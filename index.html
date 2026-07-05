@@ -423,7 +423,7 @@
     if ('caches' in window) {
       caches.keys().then(names => {
         names.forEach(name => {
-          if (name !== 'sreeambal-portal-v4') {
+          if (name !== 'sreeambal-portal-v5') {
             console.log('[CacheBuster] Deleting obsolete cache:', name);
             caches.delete(name);
           }

@@ -5,7 +5,7 @@
  * ============================================================================
  */
 
-const CACHE_NAME = 'sreeambal-portal-v4';
+const CACHE_NAME = 'sreeambal-portal-v5';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
