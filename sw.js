@@ -1,8 +1,9 @@
-const CACHE_NAME = 'sreeambal-inventory-v1';
+const CACHE_NAME = 'sreeambal-portal-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './style.css',
+  './i18n.js',
   './app.js',
   './manifest.json',
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',

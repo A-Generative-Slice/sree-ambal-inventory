@@ -3,21 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Sree Ambal Catering — iOS 14 Mobile Ledger</title>
-  <meta name="description" content="Mobile-first, offline-capable live inventory management portal for Sree Ambal Catering ground staff. Zero keyboard input required.">
-  <meta name="theme-color" content="#f2f2f7">
+  <title>Sree Ambal Catering — Minimal Multilingual Portal</title>
+  <meta name="description" content="Ultra-minimal, lightning-fast mobile inventory portal for Sree Ambal Catering with role access and security bill capture.">
+  <meta name="theme-color" content="#1a0505">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Sree Ambal">
   
   <!-- PWA Manifest -->
   <link rel="manifest" href="./manifest.json">
   <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2897/2897785.png">
 
-  <!-- Google Fonts: Modern Typography -->
+  <!-- Google Fonts: Inter & Outfit -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
 
   <!-- Supabase JS Client via CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -26,28 +26,45 @@
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <!-- App Shell / Container -->
+  <!-- Top Bar: Multilingual Language Selector -->
+  <div class="lang-bar">
+    <span class="lang-label" data-i18n="selectLang">Language / மொழி / ഭാഷ / भाषा / భాష</span>
+    <div class="lang-buttons">
+      <button class="btn-lang" onclick="switchLanguage('en')">EN</button>
+      <button class="btn-lang" onclick="switchLanguage('ta')">தமிழ்</button>
+      <button class="btn-lang" onclick="switchLanguage('ml')">മലയാളം</button>
+      <button class="btn-lang" onclick="switchLanguage('hi')">हिन्दी</button>
+      <button class="btn-lang" onclick="switchLanguage('te')">తెలుగు</button>
+    </div>
+  </div>
+
+  <!-- App Shell -->
   <div class="app-container">
     
-    <!-- Header -->
+    <!-- Minimal Header -->
     <header class="app-header">
       <div class="header-brand">
         <div class="brand-icon">🍛</div>
         <div class="brand-text">
-          <h1 id="app-title">Sree Ambal Catering</h1>
-          <span class="brand-subtitle">iOS 14 • Live Inventory</span>
+          <h1 id="app-title" data-i18n="appTitle">Sree Ambal Catering</h1>
+          <span class="brand-subtitle" id="role-subtitle" data-i18n="appSubtitle">Minimal Multilingual Portal</span>
         </div>
       </div>
 
       <div class="header-actions">
-        <!-- Connection Status Pill -->
-        <div id="network-status" class="status-pill status-online" role="status" aria-live="polite">
+        <!-- Connection Pill -->
+        <div id="network-status" class="status-pill status-online" role="status">
           <span class="status-dot"></span>
-          <span id="status-text">Live Connected</span>
+          <span id="status-text" data-i18n="statusConnected">Live Connected</span>
         </div>
 
+        <!-- Switch Role / Logout Button -->
+        <button id="switch-role-btn" class="btn-switch hidden" onclick="logoutRole()" data-i18n="switchRoleBtn" title="Switch Role">
+          👤 Switch Role
+        </button>
+
         <!-- Refresh Button -->
-        <button id="refresh-btn" class="icon-btn" title="Refresh Live Inventory" aria-label="Refresh Live Inventory">
+        <button id="refresh-btn" class="icon-btn" data-i18n-title="refreshBtnTitle" title="Refresh Live Database" aria-label="Refresh">
           <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
             <path d="M23 4v6h-6"></path>
             <path d="M1 20v-6h6"></path>
@@ -59,74 +76,159 @@
 
     <!-- Offline Alert Banner -->
     <div id="offline-banner" class="offline-banner hidden" role="alert">
-      <div class="banner-content">
-        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M1 1l22 22"></path>
-          <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
-          <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
-          <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
-          <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
-          <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
-          <line x1="12" y1="20" x2="12.01" y2="20"></line>
-        </svg>
-        <span><strong>Offline Mode</strong> — Live database updates are disabled until network is restored. Displaying locally cached stock balances.</span>
-      </div>
+      <span data-i18n="statusOffline"><strong>Offline Mode</strong> — Displaying cached balances.</span>
     </div>
 
-    <!-- Main Content Area -->
+    <!-- MAIN VIEWS -->
     <main class="main-content">
-      <section class="section-header">
-        <div class="section-title-wrapper">
-          <h2 id="ledger-title">Live Inventory Ledger</h2>
-          <p id="last-updated-text" class="last-updated">Syncing with Supabase...</p>
-        </div>
-        <div class="section-badge">
-          <span class="badge-tag">Zero-Keyboard Mode</span>
+      
+      <!-- VIEW 1: LOGIN / ROLE SELECTOR -->
+      <section id="view-login" class="view-section">
+        <div class="login-card">
+          <h2 data-i18n="loginTitle">Portal Access Login</h2>
+          <p class="login-sub" data-i18n="loginSubtitle">Select your role to access the Sree Ambal ledger</p>
+
+          <div class="role-selector">
+            <button class="role-tab active" id="tab-role-staff" onclick="selectRoleTab('staff')">
+              📦 <span data-i18n="roleStaff">Inventory Manager (Ground Staff)</span>
+            </button>
+            <button class="role-tab" id="tab-role-admin" onclick="selectRoleTab('admin')">
+              🛡️ <span data-i18n="roleAdmin">Administrator Dashboard</span>
+            </button>
+          </div>
+
+          <!-- Staff Login Form -->
+          <div id="form-login-staff" class="login-form">
+            <label data-i18n="roleStaff">Staff Name / ID</label>
+            <input type="text" id="staff-name-input" class="minimal-input" data-i18n-placeholder="staffNamePlaceholder" placeholder="Enter Your Name / ID (e.g., Ramesh - Chef)">
+            <button class="btn-primary-large" onclick="loginAsStaff()" data-i18n="loginBtn">Access Portal</button>
+          </div>
+
+          <!-- Admin Login Form -->
+          <div id="form-login-admin" class="login-form hidden">
+            <label data-i18n="roleAdmin">Admin PIN</label>
+            <input type="password" id="admin-pin-input" class="minimal-input" data-i18n-placeholder="adminPinPlaceholder" placeholder="Enter Admin PIN (Default: 1234)" maxlength="8">
+            <button class="btn-primary-large btn-admin" onclick="loginAsAdmin()" data-i18n="loginBtn">Access Portal</button>
+          </div>
         </div>
       </section>
 
-      <!-- Loading State / Skeletons -->
-      <div id="loading-container" class="loading-grid">
-        <div class="skeleton-card">
-          <div class="skeleton-header"></div>
-          <div class="skeleton-qty"></div>
-          <div class="skeleton-buttons"></div>
+      <!-- VIEW 2: STAFF GROUND LEDGER VIEW -->
+      <section id="view-staff" class="view-section hidden">
+        <div class="section-bar">
+          <h2 data-i18n="staffHeader">Ground Stock Ledger</h2>
+          <span class="badge-gold" data-i18n="zeroKeyboardBadge">Quick-Touch Mode</span>
         </div>
-        <div class="skeleton-card">
-          <div class="skeleton-header"></div>
-          <div class="skeleton-qty"></div>
-          <div class="skeleton-buttons"></div>
-        </div>
-        <div class="skeleton-card">
-          <div class="skeleton-header"></div>
-          <div class="skeleton-qty"></div>
-          <div class="skeleton-buttons"></div>
-        </div>
-      </div>
 
-      <!-- Inventory Cards Grid -->
-      <div id="inventory-grid" class="inventory-grid hidden">
-        <!-- Dynamically rendered inventory item cards go here -->
-      </div>
+        <!-- Loading State -->
+        <div id="loading-container" class="loading-grid">
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+        </div>
+
+        <!-- Inventory Grid -->
+        <div id="inventory-grid" class="inventory-grid">
+          <!-- Dynamically rendered minimal stock cards -->
+        </div>
+      </section>
+
+      <!-- VIEW 3: ADMIN CONTROL DASHBOARD -->
+      <section id="view-admin" class="view-section hidden">
+        <div class="section-bar">
+          <h2 data-i18n="adminHeader">Administrator Control Panel</h2>
+        </div>
+
+        <div class="admin-tabs">
+          <button class="admin-tab-btn active" onclick="switchAdminTab('audit')" data-i18n="tabAudit">Security Audit Trail & Bills</button>
+          <button class="admin-tab-btn" onclick="switchAdminTab('staff')" data-i18n="tabStaff">Staff Account Management</button>
+        </div>
+
+        <!-- Tab 1: Audit Trail & Captured Bills -->
+        <div id="admin-panel-audit" class="admin-panel">
+          <div class="table-wrapper">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th data-i18n="colTime">Timestamp</th>
+                  <th data-i18n="colStaff">Updated By</th>
+                  <th data-i18n="colItem">Item</th>
+                  <th data-i18n="colChange">Change</th>
+                  <th data-i18n="colBalance">New Balance</th>
+                  <th data-i18n="colBill">Bill Verification / Reference</th>
+                </tr>
+              </thead>
+              <tbody id="audit-table-body">
+                <tr><td colspan="6" class="empty-cell" data-i18n="auditEmpty">No stock movement transactions logged yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab 2: Staff Management -->
+        <div id="admin-panel-staff" class="admin-panel hidden">
+          <div class="table-wrapper">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th data-i18n="colName">Staff Name / ID</th>
+                  <th data-i18n="colStatus">Status</th>
+                  <th data-i18n="colActions">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="staff-table-body">
+                <tr><td colspan="3" class="empty-cell" data-i18n="staffEmpty">No staff managers registered yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
     </main>
-
-    <!-- Footer -->
-    <footer class="app-footer">
-      <div class="footer-info">
-        <div class="info-icon">⚡</div>
-        <div class="info-text">
-          <strong>Instant Quick-Touch Controls</strong>
-          <p>Tap large increment buttons to modify stock balances by 25kg or 50kg. Every update requires confirmation to prevent accidental taps.</p>
-        </div>
-      </div>
-    </footer>
 
   </div>
 
-  <!-- Toast Notification Container -->
-  <div id="toast-container" class="toast-container" aria-live="assertive"></div>
+  <!-- MODAL: BILL & PERMISSION PAPER PHOTO CAPTURE -->
+  <div id="bill-capture-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 data-i18n="modalTitle">Verify Stock Movement</h3>
+        <p data-i18n="modalSubtitle">Security Audit & Bill Capture</p>
+      </div>
 
-  <!-- Main Logic -->
+      <div class="modal-body">
+        <div class="modal-summary">
+          <div><strong data-i18n="modalItemLabel">Item Name:</strong> <span id="modal-item-name" class="val-highlight">Sugar</span></div>
+          <div><strong data-i18n="modalChangeLabel">Stock Adjustment:</strong> <span id="modal-change-val" class="val-highlight">+25 kg</span></div>
+          <div><strong data-i18n="modalNewBalanceLabel">New Balance:</strong> <span id="modal-new-bal" class="val-highlight">100 kg</span></div>
+        </div>
+
+        <div class="form-group">
+          <label data-i18n="modalBillLabel">Attach Bill / Permission Paper Reference:</label>
+          <input type="text" id="modal-bill-input" class="minimal-input" data-i18n-placeholder="modalBillPlaceholder" placeholder="e.g., BILL-4092 or Gate Pass #88">
+        </div>
+
+        <!-- Camera / Photo Capture -->
+        <div class="capture-group">
+          <input type="file" id="bill-photo-file" accept="image/*" capture="environment" class="hidden" onchange="handlePhotoCaptured(event)">
+          <button class="btn-camera" onclick="document.getElementById('bill-photo-file').click()" type="button" id="btn-camera-trigger">
+            📷 <span data-i18n="modalCaptureBtn">Capture Bill Photo</span>
+          </button>
+          <div id="photo-status" class="photo-status hidden" data-i18n="modalPhotoAttached">✅ Bill Photo Captured</div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeBillModal()" data-i18n="modalCancelBtn" type="button">Cancel</button>
+        <button class="btn-confirm-gold" onclick="executeStockUpdate()" data-i18n="modalConfirmBtn" type="button">Confirm & Update Database</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="./i18n.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>
