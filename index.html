@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Sree Ambal Catering — Minimal Multilingual Portal</title>
-  <meta name="description" content="Ultra-minimal, lightning-fast mobile inventory portal for Sree Ambal Catering with role access and security bill capture.">
+  <meta name="description" content="Ultra-minimal, lightning-fast mobile inventory portal for Sree Ambal Catering with role access, batch cart, and security bill capture.">
   <meta name="theme-color" content="#1a0505">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -26,15 +26,20 @@
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <!-- Top Bar: Multilingual Language Selector -->
+  <!-- Top Bar: Single Multilingual Language Dropdown -->
   <div class="lang-bar">
     <span class="lang-label" data-i18n="selectLang">Language / மொழி / ഭാഷ / भाषा / భాష</span>
-    <div class="lang-buttons">
-      <button class="btn-lang" onclick="switchLanguage('en')">EN</button>
-      <button class="btn-lang" onclick="switchLanguage('ta')">தமிழ்</button>
-      <button class="btn-lang" onclick="switchLanguage('ml')">മലയാളം</button>
-      <button class="btn-lang" onclick="switchLanguage('hi')">हिन्दी</button>
-      <button class="btn-lang" onclick="switchLanguage('te')">తెలుగు</button>
+    <div class="lang-dropdown-wrapper">
+      <button id="lang-toggle-btn" class="lang-toggle-btn" onclick="toggleLangMenu()" aria-expanded="false">
+        🌐 <span id="current-lang-label">English</span> <span class="caret">▾</span>
+      </button>
+      <div id="lang-dropdown-menu" class="lang-dropdown-menu hidden">
+        <button onclick="selectLang('en')" class="lang-item">English (EN)</button>
+        <button onclick="selectLang('ta')" class="lang-item">தமிழ் (Tamil)</button>
+        <button onclick="selectLang('ml')" class="lang-item">മലയാളം (Malayalam)</button>
+        <button onclick="selectLang('hi')" class="lang-item">हिन्दी (Hindi)</button>
+        <button onclick="selectLang('te')" class="lang-item">తెలుగు (Telugu)</button>
+      </div>
     </div>
   </div>
 
@@ -64,7 +69,7 @@
         </button>
 
         <!-- Refresh Button -->
-        <button id="refresh-btn" class="icon-btn" data-i18n-title="refreshBtnTitle" title="Refresh Live Database" aria-label="Refresh">
+        <button id="refresh-btn" class="icon-btn" data-i18n-title="refreshBtnTitle" title="Refresh Live Database" aria-label="Refresh" onclick="forceRefreshData()">
           <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
             <path d="M23 4v6h-6"></path>
             <path d="M1 20v-6h6"></path>
@@ -102,6 +107,11 @@
             <label data-i18n="roleStaff">Staff Name / ID</label>
             <input type="text" id="staff-name-input" class="minimal-input" data-i18n-placeholder="staffNamePlaceholder" placeholder="Enter Your Name / ID (e.g., Ramesh - Chef)">
             <button class="btn-primary-large" onclick="loginAsStaff()" data-i18n="loginBtn">Access Portal</button>
+            
+            <div class="register-prompt">
+              <span data-i18n="noAccountText">New staff member?</span>
+              <button type="button" class="btn-link" onclick="showRegisterModal()" data-i18n="registerLink">📝 Create Staff Account</button>
+            </div>
           </div>
 
           <!-- Admin Login Form -->
@@ -113,11 +123,50 @@
         </div>
       </section>
 
-      <!-- VIEW 2: STAFF GROUND LEDGER VIEW -->
+      <!-- VIEW 2: PENDING APPROVAL VIEW -->
+      <section id="view-pending-approval" class="view-section hidden">
+        <div class="pending-card">
+          <div class="pending-icon">⏳</div>
+          <h2 data-i18n="pendingTitle">Account Waiting for Approval</h2>
+          <p class="pending-desc" data-i18n="pendingDesc">Your staff account has been registered and is currently queued for administrator review. You will be granted ledger access once an admin approves your profile.</p>
+          
+          <div class="pending-user-info" id="pending-user-display">
+            <!-- Populated dynamically -->
+          </div>
+          
+          <div class="pending-actions">
+            <button class="btn-primary-large" onclick="checkApprovalStatus()" data-i18n="checkStatusBtn">🔄 Check Approval Status</button>
+            <button class="btn-secondary-large" onclick="logoutRole()" data-i18n="returnLoginBtn">🚪 Return to Login</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 3: STAFF GROUND LEDGER VIEW (CATALOG + CART) -->
       <section id="view-staff" class="view-section hidden">
         <div class="section-bar">
           <h2 data-i18n="staffHeader">Ground Stock Ledger</h2>
-          <span class="badge-gold" data-i18n="zeroKeyboardBadge">Quick-Touch Mode</span>
+          <button class="btn-custom-item" onclick="showCustomItemModal()" data-i18n="reqNewItemBtn">➕ Request New Item / Category</button>
+        </div>
+
+        <!-- Search & Filter Bar -->
+        <div class="search-filter-box">
+          <div class="search-input-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="catalog-search-input" class="search-input" data-i18n-placeholder="searchPlaceholder" placeholder="Search 200+ items in any language..." oninput="filterCatalog()">
+          </div>
+          
+          <!-- Category Filter Pills -->
+          <div class="category-pills">
+            <button class="cat-pill active" onclick="setCategoryFilter('all')" data-i18n="catAll">All (200+)</button>
+            <button class="cat-pill" onclick="setCategoryFilter('grains')" data-i18n="catGrains">🌾 Grains & Pulses</button>
+            <button class="cat-pill" onclick="setCategoryFilter('spices')" data-i18n="catSpices">🌶️ Spices & Masalas</button>
+            <button class="cat-pill" onclick="setCategoryFilter('oils')" data-i18n="catOils">🛢️ Oils & Ghee</button>
+            <button class="cat-pill" onclick="setCategoryFilter('sweeteners')" data-i18n="catSweeteners">🍯 Sweeteners & Acidulants</button>
+            <button class="cat-pill" onclick="setCategoryFilter('perishables')" data-i18n="catPerishables">🥬 Vegetables & Perishables</button>
+            <button class="cat-pill" onclick="setCategoryFilter('dairy')" data-i18n="catDairy">🥛 Dairy & Provisions</button>
+            <button class="cat-pill" onclick="setCategoryFilter('nuts')" data-i18n="catNuts">🥜 Nuts & Dry Fruits</button>
+            <button class="cat-pill" onclick="setCategoryFilter('utensils')" data-i18n="catUtensils">🥘 Utensils & Equipment</button>
+          </div>
         </div>
 
         <!-- Loading State -->
@@ -126,21 +175,40 @@
           <div class="skeleton-card"></div>
         </div>
 
-        <!-- Inventory Grid -->
+        <!-- Inventory Catalog Grid -->
         <div id="inventory-grid" class="inventory-grid">
-          <!-- Dynamically rendered minimal stock cards -->
+          <!-- Dynamically rendered catalog item cards with sliders and numeric boxes -->
+        </div>
+
+        <!-- Sticky Bottom Bar for Cart Trigger -->
+        <div class="sticky-cart-bar">
+          <button id="btn-open-cart" class="btn-cart-trigger" onclick="openCartDrawer()">
+            🛒 <span data-i18n="openCartBtn">Batch Cart</span> <span id="cart-badge" class="cart-badge">0</span>
+          </button>
         </div>
       </section>
 
-      <!-- VIEW 3: ADMIN CONTROL DASHBOARD -->
+      <!-- VIEW 4: ADMIN CONTROL DASHBOARD -->
       <section id="view-admin" class="view-section hidden">
         <div class="section-bar">
           <h2 data-i18n="adminHeader">Administrator Control Panel</h2>
+          <div class="export-actions">
+            <button class="btn-export" onclick="exportLedgerCSV()" title="Export Inventory Ledger as CSV Spreadsheet">
+              📥 <span data-i18n="exportLedgerBtn">Export Ledger (CSV)</span>
+            </button>
+            <button class="btn-export" onclick="exportLogsCSV()" title="Export Security Audit Logs as CSV Spreadsheet">
+              📥 <span data-i18n="exportLogsBtn">Export Logs (CSV)</span>
+            </button>
+          </div>
         </div>
 
         <div class="admin-tabs">
-          <button class="admin-tab-btn active" onclick="switchAdminTab('audit')" data-i18n="tabAudit">Security Audit Trail & Bills</button>
-          <button class="admin-tab-btn" onclick="switchAdminTab('staff')" data-i18n="tabStaff">Staff Account Management</button>
+          <button class="admin-tab-btn active" id="tab-btn-audit" onclick="switchAdminTab('audit')" data-i18n="tabAudit">Security Audit Trail & Bills</button>
+          <button class="admin-tab-btn" id="tab-btn-analytics" onclick="switchAdminTab('analytics')" data-i18n="tabAnalytics">📊 Category Analytics</button>
+          <button class="admin-tab-btn" id="tab-btn-approvals" onclick="switchAdminTab('approvals')">
+            🔔 <span data-i18n="tabApprovals">Pending Approvals</span> <span id="admin-notif-badge" class="notif-badge hidden">0</span>
+          </button>
+          <button class="admin-tab-btn" id="tab-btn-staff" onclick="switchAdminTab('staff')" data-i18n="tabStaff">Staff Accounts</button>
         </div>
 
         <!-- Tab 1: Audit Trail & Captured Bills -->
@@ -150,33 +218,85 @@
               <thead>
                 <tr>
                   <th data-i18n="colTime">Timestamp</th>
+                  <th data-i18n="colType">Type</th>
                   <th data-i18n="colStaff">Updated By</th>
-                  <th data-i18n="colItem">Item</th>
-                  <th data-i18n="colChange">Change</th>
-                  <th data-i18n="colBalance">New Balance</th>
+                  <th data-i18n="colItemSummary">Batch Items Summary</th>
                   <th data-i18n="colBill">Bill Verification / Reference</th>
                 </tr>
               </thead>
               <tbody id="audit-table-body">
-                <tr><td colspan="6" class="empty-cell" data-i18n="auditEmpty">No stock movement transactions logged yet.</td></tr>
+                <tr><td colspan="5" class="empty-cell" data-i18n="auditEmpty">No stock movement transactions logged yet.</td></tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- Tab 2: Staff Management -->
+        <!-- Tab 2: Category Analytics -->
+        <div id="admin-panel-analytics" class="admin-panel hidden">
+          <div class="analytics-card">
+            <h3 data-i18n="analyticsTitle">Current Stock Distribution by Category</h3>
+            <p class="analytics-sub" data-i18n="analyticsSub">Live volume metrics across 8 South Indian catering categories</p>
+            <div id="category-charts-container" class="charts-container">
+              <!-- Dynamically populated progress bars -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Pending Approvals (Staff Accounts + Custom Items) -->
+        <div id="admin-panel-approvals" class="admin-panel hidden">
+          <div class="approval-section">
+            <h3 class="approval-heading">⏳ Pending Staff Account Approvals</h3>
+            <div class="table-wrapper">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th data-i18n="colUsername">Username / ID</th>
+                    <th data-i18n="colEmail">Email / Phone</th>
+                    <th data-i18n="colRegTime">Registered At</th>
+                    <th data-i18n="colActions">Admin Action</th>
+                  </tr>
+                </thead>
+                <tbody id="pending-accounts-body">
+                  <tr><td colspan="4" class="empty-cell" data-i18n="noPendingAccounts">No pending user account registrations waiting for approval.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="approval-section" style="margin-top: 2rem;">
+            <h3 class="approval-heading">🏷️ Pending Custom Item / Category Requests</h3>
+            <div class="table-wrapper">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th data-i18n="colReqBy">Requested By</th>
+                    <th data-i18n="colItemName">Item / Category Name</th>
+                    <th data-i18n="colUnit">Unit</th>
+                    <th data-i18n="colActions">Admin Action</th>
+                  </tr>
+                </thead>
+                <tbody id="pending-items-body">
+                  <tr><td colspan="4" class="empty-cell" data-i18n="noPendingItems">No custom item or category requests waiting for approval.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 4: Staff Account Management -->
         <div id="admin-panel-staff" class="admin-panel hidden">
           <div class="table-wrapper">
             <table class="admin-table">
               <thead>
                 <tr>
                   <th data-i18n="colName">Staff Name / ID</th>
+                  <th data-i18n="colEmail">Email</th>
                   <th data-i18n="colStatus">Status</th>
                   <th data-i18n="colActions">Actions</th>
                 </tr>
               </thead>
               <tbody id="staff-table-body">
-                <tr><td colspan="3" class="empty-cell" data-i18n="staffEmpty">No staff managers registered yet.</td></tr>
+                <tr><td colspan="4" class="empty-cell" data-i18n="staffEmpty">No staff managers registered yet.</td></tr>
               </tbody>
             </table>
           </div>
@@ -187,39 +307,109 @@
 
   </div>
 
-  <!-- MODAL: BILL & PERMISSION PAPER PHOTO CAPTURE -->
-  <div id="bill-capture-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+  <!-- SLIDING CART DRAWER OVERLAY (BATCH IN/OUT + MANDATORY PHOTO) -->
+  <div id="cart-drawer-overlay" class="drawer-overlay hidden" role="dialog" aria-modal="true">
+    <div class="cart-drawer">
+      <div class="cart-header">
+        <h3 data-i18n="cartTitle">Inventory Batch Cart</h3>
+        <button class="icon-btn close-drawer-btn" onclick="closeCartDrawer()">✕</button>
+      </div>
+
+      <!-- Transaction Type Toggle Switch -->
+      <div class="transaction-type-wrapper">
+        <label class="toggle-label" data-i18n="txTypeLabel">Select Batch Transaction Type:</label>
+        <div class="transaction-type-toggle">
+          <button id="btn-type-in" class="type-btn active" onclick="setTransactionType('IN')">🟢 STOCK IN (Received)</button>
+          <button id="btn-type-out" class="type-btn" onclick="setTransactionType('OUT')">🔴 STOCK OUT (Dispatched)</button>
+        </div>
+      </div>
+
+      <!-- Cart Items List -->
+      <div id="cart-items-list" class="cart-items-list">
+        <!-- Dynamically rendered cart items with quantity adjustment or removal -->
+      </div>
+
+      <!-- Mandatory Security Verification Box -->
+      <div class="cart-security-box">
+        <h4 class="security-heading">🔒 <span data-i18n="securityHeading">Security Verification (Mandatory)</span></h4>
+        <p class="security-note" data-i18n="securityNote">You must capture and attach a physical bill receipt or gate pass photo to unlock submission.</p>
+        
+        <div class="form-group">
+          <input type="text" id="cart-bill-ref" class="minimal-input" data-i18n-placeholder="billRefPlaceholder" placeholder="Enter Bill / Gate Pass / Challan No. *" oninput="checkCartUnlockState()">
+        </div>
+
+        <div class="photo-capture-area">
+          <input type="file" id="cart-photo-file" accept="image/*" capture="environment" class="hidden" onchange="handleCartPhotoCaptured(event)">
+          <button class="btn-camera" onclick="document.getElementById('cart-photo-file').click()" type="button" id="btn-cart-camera">
+            📷 <span data-i18n="capturePhotoBtn">Capture Bill / Permission Photo *</span>
+          </button>
+          <div id="cart-photo-status" class="photo-status hidden">✅ <span data-i18n="photoAttachedText">Verified Receipt Attached</span></div>
+        </div>
+      </div>
+
+      <!-- Cart Footer & Submit Trigger -->
+      <div class="cart-footer">
+        <button id="btn-submit-cart" class="btn-submit-cart disabled" disabled onclick="submitBatchCart()">
+          🔒 <span id="submit-btn-text" data-i18n="attachPhotoUnlockText">Attach Photo & Bill No. to Unlock</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: REGISTRATION FOR NEW STAFF ACCOUNT -->
+  <div id="register-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 data-i18n="modalTitle">Verify Stock Movement</h3>
-        <p data-i18n="modalSubtitle">Security Audit & Bill Capture</p>
+        <h3 data-i18n="regModalTitle">Create Staff Account</h3>
+        <p data-i18n="regModalSub">Submit your details for Administrator approval</p>
       </div>
-
       <div class="modal-body">
-        <div class="modal-summary">
-          <div><strong data-i18n="modalItemLabel">Item Name:</strong> <span id="modal-item-name" class="val-highlight">Sugar</span></div>
-          <div><strong data-i18n="modalChangeLabel">Stock Adjustment:</strong> <span id="modal-change-val" class="val-highlight">+25 kg</span></div>
-          <div><strong data-i18n="modalNewBalanceLabel">New Balance:</strong> <span id="modal-new-bal" class="val-highlight">100 kg</span></div>
-        </div>
-
         <div class="form-group">
-          <label data-i18n="modalBillLabel">Attach Bill / Permission Paper Reference:</label>
-          <input type="text" id="modal-bill-input" class="minimal-input" data-i18n-placeholder="modalBillPlaceholder" placeholder="e.g., BILL-4092 or Gate Pass #88">
+          <label data-i18n="regUsernameLabel">Username / Staff ID *</label>
+          <input type="text" id="reg-username" class="minimal-input" placeholder="e.g., Suresh - Pantry">
         </div>
-
-        <!-- Camera / Photo Capture -->
-        <div class="capture-group">
-          <input type="file" id="bill-photo-file" accept="image/*" capture="environment" class="hidden" onchange="handlePhotoCaptured(event)">
-          <button class="btn-camera" onclick="document.getElementById('bill-photo-file').click()" type="button" id="btn-camera-trigger">
-            📷 <span data-i18n="modalCaptureBtn">Capture Bill Photo</span>
-          </button>
-          <div id="photo-status" class="photo-status hidden" data-i18n="modalPhotoAttached">✅ Bill Photo Captured</div>
+        <div class="form-group">
+          <label data-i18n="regEmailLabel">Email / Phone Number *</label>
+          <input type="text" id="reg-email" class="minimal-input" placeholder="e.g., suresh@sreeambal.com">
+        </div>
+        <div class="form-group">
+          <label data-i18n="regPasswordLabel">Password *</label>
+          <input type="password" id="reg-password" class="minimal-input" placeholder="Enter secure password">
         </div>
       </div>
-
       <div class="modal-footer">
-        <button class="btn-cancel" onclick="closeBillModal()" data-i18n="modalCancelBtn" type="button">Cancel</button>
-        <button class="btn-confirm-gold" onclick="executeStockUpdate()" data-i18n="modalConfirmBtn" type="button">Confirm & Update Database</button>
+        <button class="btn-cancel" onclick="closeRegisterModal()" type="button" data-i18n="modalCancelBtn">Cancel</button>
+        <button class="btn-confirm-gold" onclick="submitRegistration()" type="button" data-i18n="submitRegBtn">Register Account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: REQUEST NEW CUSTOM ITEM OR CATEGORY -->
+  <div id="custom-item-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 data-i18n="customModalTitle">Request New Item / Category</h3>
+        <p data-i18n="customModalSub">Submit for Admin approval and catalog inclusion</p>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label data-i18n="customNameLabel">Item or Category Name *</label>
+          <input type="text" id="custom-item-name" class="minimal-input" placeholder="e.g., Cardamom Syrup / Sweets Box">
+        </div>
+        <div class="form-group">
+          <label data-i18n="customUnitLabel">Default Measurement Unit *</label>
+          <select id="custom-item-unit" class="minimal-input">
+            <option value="kg">Kilograms (kg)</option>
+            <option value="L">Liters (L)</option>
+            <option value="pcs">Pieces (pcs)</option>
+            <option value="tins">Tins / Cans</option>
+            <option value="bundles">Bundles / Packs</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeCustomItemModal()" type="button" data-i18n="modalCancelBtn">Cancel</button>
+        <button class="btn-confirm-gold" onclick="submitCustomItemRequest()" type="button" data-i18n="submitReqBtn">Submit Request</button>
       </div>
     </div>
   </div>
@@ -229,11 +419,11 @@
 
   <!-- Scripts -->
   <script>
-    // Cache Buster: Clean up old iOS 14 and v1/v2 caches automatically
+    // Cache Buster: Clean up old Service Worker caches automatically
     if ('caches' in window) {
       caches.keys().then(names => {
         names.forEach(name => {
-          if (name !== 'sreeambal-portal-v3') {
+          if (name !== 'sreeambal-portal-v4') {
             console.log('[CacheBuster] Deleting obsolete cache:', name);
             caches.delete(name);
           }
@@ -241,6 +431,7 @@
       });
     }
   </script>
+  <script src="./catalog.js"></script>
   <script src="./i18n.js"></script>
   <script src="./app.js"></script>
 </body>
