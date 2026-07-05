@@ -1,0 +1,24 @@
+{
+  "name": "Sree Ambal Catering — iOS 14 Live Inventory",
+  "short_name": "Sree Ambal",
+  "description": "Mobile-first, offline-capable inventory management for Sree Ambal Catering ground staff. iOS 14 flat modern edition.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f2f2f7",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2897/2897785.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2897/2897785.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

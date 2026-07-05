@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Sree Ambal Catering — iOS 14 Mobile Ledger</title>
+  <meta name="description" content="Mobile-first, offline-capable live inventory management portal for Sree Ambal Catering ground staff. Zero keyboard input required.">
+  <meta name="theme-color" content="#f2f2f7">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Sree Ambal">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2897/2897785.png">
+
+  <!-- Google Fonts: Modern Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Supabase JS Client via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <!-- App Shell / Container -->
+  <div class="app-container">
+    
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-icon">🍛</div>
+        <div class="brand-text">
+          <h1 id="app-title">Sree Ambal Catering</h1>
+          <span class="brand-subtitle">iOS 14 • Live Inventory</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Connection Status Pill -->
+        <div id="network-status" class="status-pill status-online" role="status" aria-live="polite">
+          <span class="status-dot"></span>
+          <span id="status-text">Live Connected</span>
+        </div>
+
+        <!-- Refresh Button -->
+        <button id="refresh-btn" class="icon-btn" title="Refresh Live Inventory" aria-label="Refresh Live Inventory">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 4v6h-6"></path>
+            <path d="M1 20v-6h6"></path>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Offline Alert Banner -->
+    <div id="offline-banner" class="offline-banner hidden" role="alert">
+      <div class="banner-content">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 1l22 22"></path>
+          <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
+          <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
+          <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
+          <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
+          <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+          <line x1="12" y1="20" x2="12.01" y2="20"></line>
+        </svg>
+        <span><strong>Offline Mode</strong> — Live database updates are disabled until network is restored. Displaying locally cached stock balances.</span>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <section class="section-header">
+        <div class="section-title-wrapper">
+          <h2 id="ledger-title">Live Inventory Ledger</h2>
+          <p id="last-updated-text" class="last-updated">Syncing with Supabase...</p>
+        </div>
+        <div class="section-badge">
+          <span class="badge-tag">Zero-Keyboard Mode</span>
+        </div>
+      </section>
+
+      <!-- Loading State / Skeletons -->
+      <div id="loading-container" class="loading-grid">
+        <div class="skeleton-card">
+          <div class="skeleton-header"></div>
+          <div class="skeleton-qty"></div>
+          <div class="skeleton-buttons"></div>
+        </div>
+        <div class="skeleton-card">
+          <div class="skeleton-header"></div>
+          <div class="skeleton-qty"></div>
+          <div class="skeleton-buttons"></div>
+        </div>
+        <div class="skeleton-card">
+          <div class="skeleton-header"></div>
+          <div class="skeleton-qty"></div>
+          <div class="skeleton-buttons"></div>
+        </div>
+      </div>
+
+      <!-- Inventory Cards Grid -->
+      <div id="inventory-grid" class="inventory-grid hidden">
+        <!-- Dynamically rendered inventory item cards go here -->
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-info">
+        <div class="info-icon">⚡</div>
+        <div class="info-text">
+          <strong>Instant Quick-Touch Controls</strong>
+          <p>Tap large increment buttons to modify stock balances by 25kg or 50kg. Every update requires confirmation to prevent accidental taps.</p>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="assertive"></div>
+
+  <!-- Main Logic -->
+  <script src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,665 @@
+/* ==========================================
+   SREE AMBAL CATERING — iOS 14 FLAT MODERN THEME
+   Brand Palette: Burgundy/Maroon, Warm Gold, Vibrant Orange & Crisp White
+   ========================================== */
+
+:root {
+  /* iOS 14 System Backgrounds */
+  --bg-system: #f2f2f7;
+  --bg-secondary: #f8f9fb;
+  --bg-card: #ffffff;
+  --bg-card-hover: #fafafa;
+  
+  /* Brand Colors (Sree Ambal Catering + Orange/White Mix) */
+  --brand-maroon: #730f0f;
+  --brand-maroon-dark: #5c0606;
+  --brand-maroon-light: #fef2f2;
+  --brand-maroon-border: #fca5a5;
+
+  --brand-gold: #d97706;
+  --brand-gold-light: #fffbeb;
+  --brand-gold-border: #fde68a;
+
+  --brand-orange: #f97316;
+  --brand-orange-dark: #ea580c;
+  --brand-orange-light: #fff7ed;
+  --brand-orange-border: #fed7aa;
+
+  --brand-white: #ffffff;
+
+  /* iOS 14 Label Colors */
+  --text-primary: #1c1c1e;
+  --text-secondary: #6c6c70;
+  --text-muted: #8e8e93;
+
+  /* Borders & Shadows (Flat iOS Widget Aesthetics) */
+  --border-flat: rgba(0, 0, 0, 0.06);
+  --border-highlight: rgba(0, 0, 0, 0.12);
+  --shadow-ios: 0 4px 20px rgba(0, 0, 0, 0.05);
+  --shadow-ios-hover: 0 8px 28px rgba(0, 0, 0, 0.09);
+  --shadow-button: 0 2px 8px rgba(249, 115, 22, 0.25);
+
+  /* Fonts */
+  --font-main: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', sans-serif;
+  --font-heading: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Outfit', sans-serif;
+}
+
+/* Reset & Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-main);
+  background: var(--bg-system);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* App Container */
+.app-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  gap: 16px;
+}
+
+/* Header — iOS Navigation Bar / Widget Style */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--brand-white);
+  border: 1px solid var(--border-flat);
+  padding: 16px 20px;
+  border-radius: 22px;
+  box-shadow: var(--shadow-ios);
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-icon {
+  font-size: 26px;
+  background: linear-gradient(135deg, var(--brand-maroon), var(--brand-maroon-dark));
+  color: var(--brand-white);
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(115, 15, 15, 0.25);
+}
+
+.brand-text h1 {
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--brand-maroon);
+  letter-spacing: -0.02em;
+}
+
+.brand-subtitle {
+  font-size: 0.75rem;
+  color: var(--brand-gold);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* iOS 14 Status Pill */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.status-online {
+  background: #ecfdf5;
+  color: #059669;
+  border-color: #a7f3d0;
+}
+
+.status-offline {
+  background: var(--brand-maroon-light);
+  color: var(--brand-maroon);
+  border-color: var(--brand-maroon-border);
+}
+
+.status-syncing {
+  background: var(--brand-orange-light);
+  color: var(--brand-orange-dark);
+  border-color: var(--brand-orange-border);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  position: relative;
+}
+
+.status-online .status-dot::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.4;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+/* Refresh Button */
+.icon-btn {
+  background: var(--bg-system);
+  border: 1px solid var(--border-flat);
+  color: var(--text-primary);
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.icon-btn:hover {
+  background: #e5e5ea;
+  border-color: var(--border-highlight);
+}
+
+.icon-btn:active {
+  transform: scale(0.92);
+}
+
+.icon-btn.spinning svg {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Offline Banner */
+.offline-banner {
+  background: var(--brand-maroon-light);
+  border: 1px solid var(--brand-maroon-border);
+  color: var(--brand-maroon-dark);
+  padding: 14px 18px;
+  border-radius: 18px;
+  font-size: 0.85rem;
+  box-shadow: var(--shadow-ios);
+  transition: all 0.3s ease;
+}
+
+.banner-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.banner-content svg {
+  flex-shrink: 0;
+  color: var(--brand-maroon);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 6px;
+}
+
+.section-title-wrapper h2 {
+  font-family: var(--font-heading);
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.last-updated {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.badge-tag {
+  background: var(--brand-orange-light);
+  border: 1px solid var(--brand-orange-border);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--brand-orange-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Loading Skeletons */
+.loading-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.skeleton-card {
+  background: var(--brand-white);
+  border: 1px solid var(--border-flat);
+  border-radius: 22px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: var(--shadow-ios);
+}
+
+.skeleton-header {
+  height: 32px;
+  width: 60%;
+  background: var(--bg-system);
+  border-radius: 8px;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-qty {
+  height: 48px;
+  width: 40%;
+  background: var(--bg-system);
+  border-radius: 10px;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-buttons {
+  height: 64px;
+  width: 100%;
+  background: var(--bg-system);
+  border-radius: 14px;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+  100% { opacity: 0.4; }
+}
+
+/* Inventory Grid */
+.inventory-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+@media (min-width: 640px) {
+  .inventory-grid {
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  }
+}
+
+/* Inventory Card — Flat iOS 14 Widget Style */
+.inventory-card {
+  background: var(--brand-white);
+  border: 1px solid var(--border-flat);
+  border-radius: 24px;
+  padding: 22px;
+  box-shadow: var(--shadow-ios);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.inventory-card::top {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--brand-orange);
+}
+
+.inventory-card.item-sugar {
+  border-top: 4px solid var(--brand-maroon);
+}
+
+.inventory-card.item-rice {
+  border-top: 4px solid var(--brand-gold);
+}
+
+.inventory-card.item-logistics {
+  border-top: 4px solid var(--brand-orange);
+}
+
+.inventory-card:hover {
+  border-color: var(--border-highlight);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-ios-hover);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.item-icon {
+  font-size: 30px;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-system);
+  border-radius: 16px;
+  border: 1px solid var(--border-flat);
+}
+
+.item-info h3 {
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.item-meta {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.card-status {
+  font-size: 0.75rem;
+  background: var(--bg-system);
+  padding: 4px 10px;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+/* Quantity Display — iOS Number Pad Aesthetics */
+.card-balance {
+  background: var(--bg-system);
+  border: 1px solid var(--border-flat);
+  border-radius: 18px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.balance-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.qty-wrapper {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.qty-val {
+  font-family: var(--font-heading);
+  font-size: 2.75rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.qty-val.updated {
+  color: var(--brand-orange-dark);
+  transform: scale(1.12);
+}
+
+.qty-unit {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* Zero-Keyboard Buttons Grid — iOS 14 Flat Buttons */
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 4px;
+}
+
+@media (max-width: 480px) {
+  .button-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+.btn-inc {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+  border-radius: 16px;
+  padding: 16px 8px;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  touch-action: manipulation;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.btn-inc:active {
+  transform: scale(0.95);
+  opacity: 0.85;
+}
+
+.btn-inc:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Button Variants — Mixing Burgundy/Maroon, Gold, Orange & White */
+.btn-minus-50 {
+  background: var(--brand-maroon-light);
+  color: var(--brand-maroon-dark);
+  border-color: var(--brand-maroon-border);
+}
+
+.btn-minus-50:hover {
+  background: #fee2e2;
+}
+
+.btn-minus-25 {
+  background: var(--brand-gold-light);
+  color: #b45309;
+  border-color: var(--brand-gold-border);
+}
+
+.btn-minus-25:hover {
+  background: #fef3c7;
+}
+
+.btn-plus-25 {
+  background: var(--brand-orange);
+  color: var(--brand-white);
+  border-color: var(--brand-orange-dark);
+  box-shadow: var(--shadow-button);
+}
+
+.btn-plus-25:hover {
+  background: var(--brand-orange-dark);
+}
+
+.btn-plus-50 {
+  background: var(--brand-maroon);
+  color: var(--brand-white);
+  border-color: var(--brand-maroon-dark);
+  box-shadow: 0 2px 8px rgba(115, 15, 15, 0.3);
+}
+
+.btn-plus-50:hover {
+  background: var(--brand-maroon-dark);
+}
+
+/* Footer */
+.app-footer {
+  margin-top: 16px;
+  padding: 18px 20px;
+  background: var(--brand-white);
+  border: 1px solid var(--border-flat);
+  border-radius: 22px;
+  box-shadow: var(--shadow-ios);
+}
+
+.footer-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.info-icon {
+  font-size: 22px;
+  background: var(--brand-orange-light);
+  color: var(--brand-orange-dark);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  flex-shrink: 0;
+  border: 1px solid var(--brand-orange-border);
+}
+
+.info-text strong {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.info-text p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* Toast Notifications */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 90%;
+  max-width: 420px;
+  pointer-events: none;
+}
+
+.toast {
+  background: #1c1c1ee6;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 4px solid var(--brand-orange);
+  color: var(--brand-white);
+  padding: 14px 18px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: auto;
+  animation: toastSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.toast.toast-error {
+  border-left-color: #f43f5e;
+}
+
+.toast.toast-info {
+  border-left-color: var(--brand-gold);
+}
+
+.toast-message {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@keyframes toastSlideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
