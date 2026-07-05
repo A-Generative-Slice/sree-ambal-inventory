@@ -10,9 +10,9 @@ const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './style.css',
-  './catalog.js',
-  './i18n.js',
-  './app.js',
+  './catalog.js?v=5',
+  './i18n.js?v=5',
+  './app.js?v=5',
   './manifest.json',
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
   'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap'
