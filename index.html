@@ -228,6 +228,19 @@
   <div id="toast-container" class="toast-container"></div>
 
   <!-- Scripts -->
+  <script>
+    // Cache Buster: Clean up old iOS 14 and v1/v2 caches automatically
+    if ('caches' in window) {
+      caches.keys().then(names => {
+        names.forEach(name => {
+          if (name !== 'sreeambal-portal-v3') {
+            console.log('[CacheBuster] Deleting obsolete cache:', name);
+            caches.delete(name);
+          }
+        });
+      });
+    }
+  </script>
   <script src="./i18n.js"></script>
   <script src="./app.js"></script>
 </body>
