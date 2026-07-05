@@ -77,7 +77,72 @@ const I18N_DICTIONARY = {
     refreshBtnTitle: "Refresh Live Database",
     toastUpdated: "Stock updated successfully live in Supabase!",
     toastOfflineUpdate: "Saved offline. Will sync when Wi-Fi connects.",
-    toastError: "Database update error: "
+    toastError: "Database update error: ",
+
+    // v2: Search & Catalog
+    searchPlaceholder: "Search 200+ items in any language...",
+    reqNewItemBtn: "➕ Request New Item / Category",
+    catAll: "All (200+)",
+    catGrains: "🌾 Grains & Pulses",
+    catSpices: "🌶️ Spices & Masalas",
+    catOils: "🛢️ Oils & Ghee",
+    catSweeteners: "🍯 Sweeteners & Acidulants",
+    catPerishables: "🥬 Vegetables & Perishables",
+    catDairy: "🥛 Dairy & Provisions",
+    catNuts: "🥜 Nuts & Dry Fruits",
+    catUtensils: "🥘 Utensils & Equipment",
+
+    // v2: Cart & Batch Processing
+    openCartBtn: "Batch Cart",
+    cartTitle: "Inventory Batch Cart",
+    txTypeLabel: "Select Batch Transaction Type:",
+    securityHeading: "Security Verification (Mandatory)",
+    securityNote: "You must capture and attach a physical bill receipt or gate pass photo to unlock submission.",
+    billRefPlaceholder: "Enter Bill / Gate Pass / Challan No. *",
+    capturePhotoBtn: "Capture Bill / Permission Photo *",
+    photoAttachedText: "Verified Receipt Attached",
+    attachPhotoUnlockText: "Attach Photo & Bill No. to Unlock",
+
+    // v2: Registration & Approval
+    noAccountText: "New staff member?",
+    registerLink: "📝 Create Staff Account",
+    regModalTitle: "Create Staff Account",
+    regModalSub: "Submit your details for Administrator approval",
+    regUsernameLabel: "Username / Staff ID *",
+    regEmailLabel: "Email / Phone Number *",
+    regPasswordLabel: "Password *",
+    submitRegBtn: "Register Account",
+    pendingTitle: "Account Waiting for Approval",
+    pendingDesc: "Your staff account has been registered and is currently queued for administrator review.",
+    checkStatusBtn: "🔄 Check Approval Status",
+    returnLoginBtn: "🚪 Return to Login",
+
+    // v2: Custom Item Request
+    customModalTitle: "Request New Item / Category",
+    customModalSub: "Submit for Admin approval and catalog inclusion",
+    customNameLabel: "Item or Category Name *",
+    customUnitLabel: "Default Measurement Unit *",
+    submitReqBtn: "Submit Request",
+
+    // v2: Admin Tabs & Analytics
+    tabAudit: "Security Audit Trail & Bills",
+    tabAnalytics: "📊 Category Analytics",
+    tabApprovals: "Pending Approvals",
+    tabStaff: "Staff Accounts",
+    colType: "Type",
+    colItemSummary: "Batch Items Summary",
+    colEmail: "Email",
+    colRegTime: "Registered At",
+    colUsername: "Username / ID",
+    colReqBy: "Requested By",
+    colItemName: "Item / Category Name",
+    colUnit: "Unit",
+    noPendingAccounts: "No pending user account registrations.",
+    noPendingItems: "No custom item requests waiting.",
+    analyticsTitle: "Current Stock Distribution by Category",
+    analyticsSub: "Live volume metrics across 8 South Indian catering categories",
+    exportLedgerBtn: "Export Ledger (CSV)",
+    exportLogsBtn: "Export Logs (CSV)"
   },
 
   ta: {
@@ -146,7 +211,14 @@ const I18N_DICTIONARY = {
     refreshBtnTitle: "தரவை புதுப்பி",
     toastUpdated: "சரக்கு இருப்பு வெற்றிகரமாக புதுப்பிக்கப்பட்டது!",
     toastOfflineUpdate: "ஆஃப்லைனில் சேமிக்கப்பட்டது. இணையம் வந்ததும் ஒத்திசைக்கப்படும்.",
-    toastError: "பிழை: "
+    toastError: "பிழை: ",
+    searchPlaceholder: "200+ பொருட்களை தேடுங்கள்...",
+    reqNewItemBtn: "➕ புதிய பொருள் கோரிக்கை",
+    catAll: "அனைத்தும் (200+)", catGrains: "🌾 தானியங்கள்", catSpices: "🌶️ மசாலா", catOils: "🛢️ எண்ணெய்", catSweeteners: "🍯 இனிப்பு", catPerishables: "🥬 காய்கறிகள்", catDairy: "🥛 பால்", catNuts: "🥜 பருப்பு", catUtensils: "🥘 பாத்திரங்கள்",
+    openCartBtn: "தொகுப்பு வண்டி", cartTitle: "சரக்கு தொகுப்பு வண்டி", txTypeLabel: "பரிவர்த்தனை வகை:", securityHeading: "பாதுகாப்பு சரிபார்ப்பு (கட்டாயம்)", securityNote: "ரசீது புகைப்படம் இணைக்கவும்.", billRefPlaceholder: "பில் / கேட் பாஸ் எண் *", capturePhotoBtn: "📷 ரசீது புகைப்படம் *", photoAttachedText: "ரசீது இணைக்கப்பட்டது", attachPhotoUnlockText: "புகைப்படம் இணைத்து திறக்கவும்",
+    noAccountText: "புதிய பணியாளரா?", registerLink: "📝 கணக்கு உருவாக்கு", regModalTitle: "பணியாளர் கணக்கு உருவாக்கம்", regModalSub: "நிர்வாகி ஒப்புதலுக்கு சமர்ப்பிக்கவும்", regUsernameLabel: "பயனர்பெயர் *", regEmailLabel: "மின்னஞ்சல் / தொலைபேசி *", regPasswordLabel: "கடவுச்சொல் *", submitRegBtn: "பதிவு செய்", pendingTitle: "ஒப்புதலுக்காக காத்திருக்கிறது", pendingDesc: "உங்கள் கணக்கு நிர்வாகி மதிப்பாய்வுக்கு காத்திருக்கிறது.", checkStatusBtn: "🔄 நிலையை சரிபார்", returnLoginBtn: "🚪 உள்நுழைவுக்கு திரும்பு",
+    customModalTitle: "புதிய பொருள் கோரிக்கை", customModalSub: "நிர்வாகி ஒப்புதலுக்கு", customNameLabel: "பொருள் பெயர் *", customUnitLabel: "அளவீட்டு அலகு *", submitReqBtn: "கோரிக்கை சமர்ப்பி",
+    tabAnalytics: "📊 பகுப்பாய்வு", tabApprovals: "ஒப்புதல்கள்", colType: "வகை", colItemSummary: "தொகுப்பு சுருக்கம்", colEmail: "மின்னஞ்சல்", colRegTime: "பதிவு நேரம்", colUsername: "பயனர்பெயர்", colReqBy: "கோரியவர்", colItemName: "பொருள் பெயர்", colUnit: "அலகு", noPendingAccounts: "நிலுவையில் கணக்குகள் இல்லை.", noPendingItems: "நிலுவையில் கோரிக்கைகள் இல்லை.", analyticsTitle: "வகைவாரி சரக்கு விநியோகம்", analyticsSub: "8 வகைகளில் நேரடி அளவீடுகள்", exportLedgerBtn: "சரக்கு ஏற்றுமதி (CSV)", exportLogsBtn: "பதிவுகள் ஏற்றுமதி (CSV)"
   },
 
   ml: {
@@ -215,7 +287,12 @@ const I18N_DICTIONARY = {
     refreshBtnTitle: "റിഫ്രഷ് ചെയ്യുക",
     toastUpdated: "സ്റ്റോക്ക് വിജയകരമായി അപ്ഡേറ്റ് ചെയ്തു!",
     toastOfflineUpdate: "ഓഫ്‌ലൈനായി സേവ് ചെയ്തു.",
-    toastError: "എറർ: "
+    toastError: "എറർ: ",
+    searchPlaceholder: "200+ സാധനങ്ങൾ തിരയുക...", reqNewItemBtn: "➕ പുതിയ സാധനം", catAll: "എല്ലാം (200+)", catGrains: "🌾 ധാന്യങ്ങൾ", catSpices: "🌶️ മസാല", catOils: "🛢️ എണ്ണ", catSweeteners: "🍯 മധുരം", catPerishables: "🥬 പച്ചക്കറി", catDairy: "🥛 പാൽ", catNuts: "🥜 നട്ട്സ്", catUtensils: "🥘 പാത്രങ്ങൾ",
+    openCartBtn: "ബാച്ച് കാർട്ട്", cartTitle: "ഇൻവെന്ററി ബാച്ച് കാർട്ട്", txTypeLabel: "ഇടപാട് തരം:", securityHeading: "സുരക്ഷാ പരിശോധന", securityNote: "ബിൽ ഫോട്ടോ അറ്റാച്ച് ചെയ്യുക.", billRefPlaceholder: "ബിൽ / ഗേറ്റ് പാസ് നമ്പർ *", capturePhotoBtn: "📷 ബിൽ ഫോട്ടോ *", photoAttachedText: "ഫോട്ടോ അറ്റാച്ച്ഡ്", attachPhotoUnlockText: "അൺലോക്ക് ചെയ്യാൻ ഫോട്ടോ ചേർക്കുക",
+    noAccountText: "പുതിയ സ്റ്റാഫ്?", registerLink: "📝 അക്കൗണ്ട് ഉണ്ടാക്കുക", regModalTitle: "സ്റ്റാഫ് അക്കൗണ്ട്", regModalSub: "അഡ്മിൻ അംഗീകാരത്തിനായി", regUsernameLabel: "പേര് *", regEmailLabel: "ഇമെയിൽ *", regPasswordLabel: "പാസ്‌വേഡ് *", submitRegBtn: "രജിസ്റ്റർ", pendingTitle: "അംഗീകാരത്തിനായി കാത്തിരിക്കുന്നു", pendingDesc: "നിങ്ങളുടെ അക്കൗണ്ട് അഡ്മിൻ അവലോകനത്തിനായി കാത്തിരിക്കുന്നു.", checkStatusBtn: "🔄 സ്റ്റാറ്റസ് പരിശോധിക്കുക", returnLoginBtn: "🚪 ലോഗിനിലേക്ക്",
+    customModalTitle: "പുതിയ സാധനം", customModalSub: "അഡ്മിൻ അംഗീകാരത്തിനായി", customNameLabel: "സാധനത്തിന്റെ പേര് *", customUnitLabel: "യൂണിറ്റ് *", submitReqBtn: "സമർപ്പിക്കുക",
+    tabAnalytics: "📊 അനലിറ്റിക്സ്", tabApprovals: "അംഗീകാരങ്ങൾ", colType: "തരം", colItemSummary: "സംഗ്രഹം", colEmail: "ഇമെയിൽ", colRegTime: "രജിസ്ട്രേഷൻ", colUsername: "പേര്", colReqBy: "അഭ്യർത്ഥിച്ചത്", colItemName: "സാധനം", colUnit: "യൂണിറ്റ്", noPendingAccounts: "പെൻഡിംഗ് അക്കൗണ്ടുകൾ ഇല്ല.", noPendingItems: "പെൻഡിംഗ് അഭ്യർത്ഥനകൾ ഇല്ല.", analyticsTitle: "വിഭാഗം അനുസരിച്ച് സ്റ്റോക്ക്", analyticsSub: "8 വിഭാഗങ്ങളിലെ ലൈവ് മെട്രിക്സ്", exportLedgerBtn: "ലെഡ്ജർ (CSV)", exportLogsBtn: "ലോഗുകൾ (CSV)"
   },
 
   hi: {
@@ -284,7 +361,12 @@ const I18N_DICTIONARY = {
     refreshBtnTitle: "डेटा रीफ्रेश करें",
     toastUpdated: "स्टॉक सफलतापूर्वक अपडेट किया गया!",
     toastOfflineUpdate: "ऑफ़लाइन सहेजा गया। इंटरनेट आने पर सिंक होगा।",
-    toastError: "डेटाबेस त्रुटि: "
+    toastError: "डेटाबेस त्रुटि: ",
+    searchPlaceholder: "200+ आइटम खोजें...", reqNewItemBtn: "➕ नया आइटम", catAll: "सभी (200+)", catGrains: "🌾 अनाज", catSpices: "🌶️ मसाले", catOils: "🛢️ तेल", catSweeteners: "🍯 मीठा", catPerishables: "🥬 सब्जी", catDairy: "🥛 दूध", catNuts: "🥜 मेवे", catUtensils: "🥘 बर्तन",
+    openCartBtn: "बैच कार्ट", cartTitle: "इन्वेंटरी बैच कार्ट", txTypeLabel: "लेनदेन प्रकार:", securityHeading: "सुरक्षा सत्यापन", securityNote: "बिल फोटो संलग्न करें.", billRefPlaceholder: "बिल / गेट पास नं. *", capturePhotoBtn: "📷 बिल फोटो *", photoAttachedText: "फोटो संलग्न", attachPhotoUnlockText: "अनलॉक करने के लिए फोटो जोड़ें",
+    noAccountText: "नए स्टाफ?", registerLink: "📝 खाता बनाएं", regModalTitle: "स्टाफ खाता", regModalSub: "एडमिन अनुमोदन के लिए", regUsernameLabel: "नाम *", regEmailLabel: "ईमेल *", regPasswordLabel: "पासवर्ड *", submitRegBtn: "पंजीकरण", pendingTitle: "अनुमोदन की प्रतीक्षा", pendingDesc: "आपका खाता समीक्षा के लिए कतार में है.", checkStatusBtn: "🔄 स्थिति जांचें", returnLoginBtn: "🚪 वापस लॉगिन",
+    customModalTitle: "नया आइटम", customModalSub: "एडमिन अनुमोदन", customNameLabel: "आइटम नाम *", customUnitLabel: "इकाई *", submitReqBtn: "अनुरोध भेजें",
+    tabAnalytics: "📊 एनालिटिक्स", tabApprovals: "अनुमोदन", colType: "प्रकार", colItemSummary: "सारांश", colEmail: "ईमेल", colRegTime: "पंजीकरण", colUsername: "नाम", colReqBy: "अनुरोधकर्ता", colItemName: "आइटम", colUnit: "इकाई", noPendingAccounts: "कोई लंबित खाते नहीं.", noPendingItems: "कोई लंबित अनुरोध नहीं.", analyticsTitle: "श्रेणी अनुसार स्टॉक", analyticsSub: "8 श्रेणियों में लाइव मेट्रिक्स", exportLedgerBtn: "लेजर (CSV)", exportLogsBtn: "लॉग (CSV)"
   },
 
   te: {
@@ -353,7 +435,12 @@ const I18N_DICTIONARY = {
     refreshBtnTitle: "డేటా రిఫ్రెష్",
     toastUpdated: "స్టాక్ విజయవంతంగా అప్‌డేట్ చేయబడింది!",
     toastOfflineUpdate: "ఆఫ్‌లైన్‌లో సేవ్ చేయబడింది.",
-    toastError: "ఎర్రర్: "
+    toastError: "ఎర్రర్: ",
+    searchPlaceholder: "200+ వస్తువులు వెతకండి...", reqNewItemBtn: "➕ కొత్త వస్తువు", catAll: "అన్నీ (200+)", catGrains: "🌾 ధాన్యాలు", catSpices: "🌶️ మసాలాలు", catOils: "🛢️ నూనెలు", catSweeteners: "🍯 తీపి", catPerishables: "🥬 కూరగాయలు", catDairy: "🥛 పాలు", catNuts: "🥜 డ్రై ఫ్రూట్స్", catUtensils: "🥘 పాత్రలు",
+    openCartBtn: "బ్యాచ్ కార్ట్", cartTitle: "ఇన్వెంటరీ బ్యాచ్ కార్ట్", txTypeLabel: "లావాదేవీ రకం:", securityHeading: "భద్రతా ధ్రువీకరణ", securityNote: "బిల్లు ఫోటో జత చేయండి.", billRefPlaceholder: "బిల్లు / గేట్ పాస్ నం. *", capturePhotoBtn: "📷 బిల్లు ఫోటో *", photoAttachedText: "ఫోటో జతచేయబడింది", attachPhotoUnlockText: "అన్‌లాక్ చేయడానికి ఫోటో జత చేయండి",
+    noAccountText: "కొత్త స్టాఫ్?", registerLink: "📝 ఖాతా సృష్టించు", regModalTitle: "స్టాఫ్ ఖాతా", regModalSub: "అడ్మిన్ ఆమోదం కోసం", regUsernameLabel: "పేరు *", regEmailLabel: "ఇమెయిల్ *", regPasswordLabel: "పాస్‌వర్డ్ *", submitRegBtn: "నమోదు", pendingTitle: "ఆమోదం కోసం వేచి ఉంది", pendingDesc: "మీ ఖాతా అడ్మిన్ సమీక్ష కోసం వేచి ఉంది.", checkStatusBtn: "🔄 స్థితి తనిఖీ", returnLoginBtn: "🚪 లాగిన్‌కి తిరిగి",
+    customModalTitle: "కొత్త వస్తువు", customModalSub: "అడ్మిన్ ఆమోదం", customNameLabel: "వస్తువు పేరు *", customUnitLabel: "యూనిట్ *", submitReqBtn: "అభ్యర్థన పంపు",
+    tabAnalytics: "📊 అనలిటిక్స్", tabApprovals: "ఆమోదాలు", colType: "రకం", colItemSummary: "సారాంశం", colEmail: "ఇమెయిల్", colRegTime: "నమోదు", colUsername: "పేరు", colReqBy: "అభ్యర్థించినవారు", colItemName: "వస్తువు", colUnit: "యూనిట్", noPendingAccounts: "పెండింగ్ ఖాతాలు లేవు.", noPendingItems: "పెండింగ్ అభ్యర్థనలు లేవు.", analyticsTitle: "విభాగం ప్రకారం స్టాక్", analyticsSub: "8 విభాగాలలో లైవ్ మెట్రిక్స్", exportLedgerBtn: "లెడ్జర్ (CSV)", exportLogsBtn: "లాగ్‌లు (CSV)"
   }
 };
 
@@ -399,8 +486,8 @@ function applyTranslations() {
   });
 
   // Re-render dynamic components if app is ready
-  if (typeof renderInventory === 'function' && window.inventoryData) {
-    renderInventory(window.inventoryData);
+  if (typeof renderCatalogGrid === 'function') {
+    renderCatalogGrid();
   }
   if (typeof renderAdminDashboard === 'function' && document.getElementById('view-admin') && !document.getElementById('view-admin').classList.contains('hidden')) {
     renderAdminDashboard();
