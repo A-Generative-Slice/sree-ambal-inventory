@@ -1,11 +1,11 @@
 {
-  "name": "Sree Ambal Catering — iOS 14 Live Inventory",
+  "name": "Sree Ambal Catering — Minimal Multilingual Portal",
   "short_name": "Sree Ambal",
-  "description": "Mobile-first, offline-capable inventory management for Sree Ambal Catering ground staff. iOS 14 flat modern edition.",
+  "description": "Minimal, high-contrast multilingual inventory portal for Sree Ambal Catering with role access and security bill capture.",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#f2f2f7",
+  "background_color": "#0f0505",
+  "theme_color": "#1a0505",
   "orientation": "any",
   "icons": [
     {
