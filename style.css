@@ -73,8 +73,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  overflow-x: auto;
-  white-space: nowrap;
+  position: relative;
 }
 
 .lang-label {
@@ -576,9 +575,17 @@ body {
 /* Admin Dashboard Tabs & Tables */
 .admin-tabs {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   border-bottom: 1px solid var(--border-subtle);
   padding-bottom: 8px;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Hide for Firefox */
+}
+
+.admin-tabs::-webkit-scrollbar {
+  display: none; /* Hide for Chrome, Safari, and Opera */
 }
 
 .admin-tab-btn {
@@ -590,6 +597,8 @@ body {
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .admin-tab-btn.active {
@@ -1001,15 +1010,12 @@ body {
   gap: 8px;
   overflow-x: auto;
   padding-bottom: 4px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .category-pills::-webkit-scrollbar {
-  height: 4px;
-}
-
-.category-pills::-webkit-scrollbar-thumb {
-  background: var(--border-gold);
-  border-radius: 4px;
+  display: none;
 }
 
 .cat-pill {
@@ -1023,6 +1029,7 @@ body {
   white-space: nowrap;
   cursor: pointer;
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .cat-pill:hover, .cat-pill.active {
@@ -1479,4 +1486,66 @@ body {
   background: linear-gradient(90deg, var(--brand-maroon-bright), var(--brand-gold));
   border-radius: 9999px;
   transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================================================
+ * MOBILE RESPONSIVENESS AND FIXES (< 600px)
+ * ============================================================================ */
+@media (max-width: 600px) {
+  /* Header stacking */
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+  }
+  
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 10px;
+    gap: 8px;
+  }
+
+  .status-pill {
+    padding: 4px 8px;
+    font-size: 0.7rem;
+  }
+
+  .btn-switch {
+    font-size: 0.75rem;
+    padding: 6px 10px;
+  }
+
+  /* Admin section adjustments */
+  .section-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .section-bar h2 {
+    font-size: 1.2rem;
+  }
+
+  .export-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .btn-export {
+    width: 100%;
+    justify-content: center;
+    padding: 8px;
+    font-size: 0.75rem;
+  }
+
+  /* Prevent button wrapping in tables */
+  .admin-table td:last-child {
+    white-space: nowrap;
+  }
 }

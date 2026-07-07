@@ -176,19 +176,20 @@ function selectRoleTab(role) {
 
 function loginAsStaff() {
   const input = document.getElementById('staff-name-input');
-  const name = input ? input.value.trim() : '';
-  if (!name) {
-    showToast('Please enter your Staff Name or ID.', 'error');
+  const val = input ? input.value.trim() : '';
+  if (!val) {
+    showToast('Please enter your 4-digit Staff PIN.', 'error');
     return;
   }
 
-  // Check user account approval status
-  let userAcc = staffAccounts.find(s => s.name.toLowerCase() === name.toLowerCase());
+  // Find user by PIN
+  let userAcc = staffAccounts.find(s => s.pin === val);
+  // Fallback: also match by name for legacy users
+  if (!userAcc) userAcc = staffAccounts.find(s => s.name.toLowerCase() === val.toLowerCase());
+  
   if (!userAcc) {
-    // If auto-logging in legacy user, register as approved
-    userAcc = { id: `staff-${Date.now()}`, name: name, email: `${name.toLowerCase().replace(/[^a-z]/g,'')}@sreeambal.com`, status: 'Approved', regTime: new Date().toISOString().split('T')[0] };
-    staffAccounts.push(userAcc);
-    saveStaffAccounts();
+    showToast('No account found with this PIN. Please register first.', 'error');
+    return;
   }
 
   currentStaffName = userAcc.name;
@@ -208,7 +209,7 @@ function loginAsStaff() {
   currentUserRole = 'staff';
   localStorage.setItem('sreeambal_user_role', 'staff');
   routeToActiveRole();
-  showToast(`Welcome to Sree Ambal Portal, ${currentStaffName}!`, 'info');
+  showToast(`Welcome back, ${currentStaffName}! (PIN: ${userAcc.pin})`, 'info');
 }
 
 function loginAsAdmin() {
