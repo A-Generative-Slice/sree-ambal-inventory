@@ -28,10 +28,9 @@
 <body>
   <!-- Top Bar: Single Multilingual Language Dropdown -->
   <div class="lang-bar">
-    <span class="lang-label" data-i18n="selectLang">Language / மொழி / ഭാഷ / भाषा / భాష</span>
     <div class="lang-dropdown-wrapper">
       <button id="lang-toggle-btn" class="lang-toggle-btn" onclick="toggleLangMenu()" aria-expanded="false">
-        🌐 <span id="current-lang-label">English</span> <span class="caret">▾</span>
+        <span id="current-lang-label">English</span> <span class="caret">▾</span>
       </button>
       <div id="lang-dropdown-menu" class="lang-dropdown-menu hidden">
         <button onclick="selectLang('en')" class="lang-item">English (EN)</button>
@@ -49,7 +48,7 @@
     <!-- Minimal Header -->
     <header class="app-header">
       <div class="header-brand">
-        <div class="brand-icon">🍛</div>
+        <div class="brand-icon" style="font-weight: 800; font-size: 1rem; color: var(--text-gold);">SA</div>
         <div class="brand-text">
           <h1 id="app-title" data-i18n="appTitle">Sree Ambal Catering</h1>
           <span class="brand-subtitle" id="role-subtitle" data-i18n="appSubtitle">Minimal Multilingual Portal</span>
@@ -65,7 +64,7 @@
 
         <!-- Switch Role / Logout Button -->
         <button id="switch-role-btn" class="btn-switch hidden" onclick="logoutRole()" data-i18n="switchRoleBtn" title="Switch Role">
-          👤 Switch Role
+          Switch Role
         </button>
 
         <!-- Refresh Button -->
@@ -95,10 +94,10 @@
 
           <div class="role-selector">
             <button class="role-tab active" id="tab-role-staff" onclick="selectRoleTab('staff')">
-              📦 <span data-i18n="roleStaff">Inventory Manager (Ground Staff)</span>
+              <span data-i18n="roleStaff">Inventory Manager (Ground Staff)</span>
             </button>
             <button class="role-tab" id="tab-role-admin" onclick="selectRoleTab('admin')">
-              🛡️ <span data-i18n="roleAdmin">Administrator Dashboard</span>
+              <span data-i18n="roleAdmin">Administrator Dashboard</span>
             </button>
           </div>
 
@@ -110,7 +109,7 @@
             
             <div class="register-prompt">
               <span data-i18n="noAccountText">New staff member?</span>
-              <button type="button" class="btn-link" onclick="showRegisterModal()" data-i18n="registerLink">📝 Create Staff Account</button>
+              <button type="button" class="btn-link" onclick="showRegisterModal()" data-i18n="registerLink">Create Staff Account</button>
             </div>
           </div>
 
@@ -126,7 +125,7 @@
       <!-- VIEW 2: PENDING APPROVAL VIEW -->
       <section id="view-pending-approval" class="view-section hidden">
         <div class="pending-card">
-          <div class="pending-icon">⏳</div>
+          <div class="pending-icon" style="border: 2px solid var(--border-gold); border-radius: 50%; width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; font-weight: 800; color: var(--text-gold);">...</div>
           <h2 data-i18n="pendingTitle">Account Waiting for Approval</h2>
           <p class="pending-desc" data-i18n="pendingDesc">Your staff account has been registered and is currently queued for administrator review. You will be granted ledger access once an admin approves your profile.</p>
           
@@ -135,8 +134,8 @@
           </div>
           
           <div class="pending-actions">
-            <button class="btn-primary-large" onclick="checkApprovalStatus()" data-i18n="checkStatusBtn">🔄 Check Approval Status</button>
-            <button class="btn-secondary-large" onclick="logoutRole()" data-i18n="returnLoginBtn">🚪 Return to Login</button>
+            <button class="btn-primary-large" onclick="checkApprovalStatus()" data-i18n="checkStatusBtn">Check Approval Status</button>
+            <button class="btn-secondary-large" onclick="logoutRole()" data-i18n="returnLoginBtn">Return to Login</button>
           </div>
         </div>
       </section>
@@ -145,27 +144,27 @@
       <section id="view-staff" class="view-section hidden">
         <div class="section-bar">
           <h2 data-i18n="staffHeader">Ground Stock Ledger</h2>
-          <button class="btn-custom-item" onclick="showCustomItemModal()" data-i18n="reqNewItemBtn">➕ Request New Item / Category</button>
+          <button class="btn-custom-item" onclick="showCustomItemModal()" data-i18n="reqNewItemBtn">Request New Item / Category</button>
         </div>
 
         <!-- Search & Filter Bar -->
         <div class="search-filter-box">
           <div class="search-input-wrapper">
-            <span class="search-icon">🔍</span>
+            <span class="search-icon">Search:</span>
             <input type="text" id="catalog-search-input" class="search-input" data-i18n-placeholder="searchPlaceholder" placeholder="Search 200+ items in any language..." oninput="filterCatalog()">
           </div>
           
           <!-- Category Filter Pills -->
           <div class="category-pills">
             <button class="cat-pill active" onclick="setCategoryFilter('all')" data-i18n="catAll">All (200+)</button>
-            <button class="cat-pill" onclick="setCategoryFilter('grains')" data-i18n="catGrains">🌾 Grains & Pulses</button>
-            <button class="cat-pill" onclick="setCategoryFilter('spices')" data-i18n="catSpices">🌶️ Spices & Masalas</button>
-            <button class="cat-pill" onclick="setCategoryFilter('oils')" data-i18n="catOils">🛢️ Oils & Ghee</button>
-            <button class="cat-pill" onclick="setCategoryFilter('sweeteners')" data-i18n="catSweeteners">🍯 Sweeteners & Acidulants</button>
-            <button class="cat-pill" onclick="setCategoryFilter('perishables')" data-i18n="catPerishables">🥬 Vegetables & Perishables</button>
-            <button class="cat-pill" onclick="setCategoryFilter('dairy')" data-i18n="catDairy">🥛 Dairy & Provisions</button>
-            <button class="cat-pill" onclick="setCategoryFilter('nuts')" data-i18n="catNuts">🥜 Nuts & Dry Fruits</button>
-            <button class="cat-pill" onclick="setCategoryFilter('utensils')" data-i18n="catUtensils">🥘 Utensils & Equipment</button>
+            <button class="cat-pill" onclick="setCategoryFilter('grains')" data-i18n="catGrains">Grains & Pulses</button>
+            <button class="cat-pill" onclick="setCategoryFilter('spices')" data-i18n="catSpices">Spices & Masalas</button>
+            <button class="cat-pill" onclick="setCategoryFilter('oils')" data-i18n="catOils">Oils & Ghee</button>
+            <button class="cat-pill" onclick="setCategoryFilter('sweeteners')" data-i18n="catSweeteners">Sweeteners & Acidulants</button>
+            <button class="cat-pill" onclick="setCategoryFilter('perishables')" data-i18n="catPerishables">Vegetables & Perishables</button>
+            <button class="cat-pill" onclick="setCategoryFilter('dairy')" data-i18n="catDairy">Dairy & Provisions</button>
+            <button class="cat-pill" onclick="setCategoryFilter('nuts')" data-i18n="catNuts">Nuts & Dry Fruits</button>
+            <button class="cat-pill" onclick="setCategoryFilter('utensils')" data-i18n="catUtensils">Utensils & Equipment</button>
           </div>
         </div>
 
@@ -183,7 +182,7 @@
         <!-- Sticky Bottom Bar for Cart Trigger -->
         <div class="sticky-cart-bar">
           <button id="btn-open-cart" class="btn-cart-trigger" onclick="openCartDrawer()">
-            🛒 <span data-i18n="openCartBtn">Batch Cart</span> <span id="cart-badge" class="cart-badge">0</span>
+            <span data-i18n="openCartBtn">Batch Cart</span> <span id="cart-badge" class="cart-badge">0</span>
           </button>
         </div>
       </section>
@@ -194,19 +193,19 @@
           <h2 data-i18n="adminHeader">Administrator Control Panel</h2>
           <div class="export-actions">
             <button class="btn-export" onclick="exportLedgerCSV()" title="Export Inventory Ledger as CSV Spreadsheet">
-              📥 <span data-i18n="exportLedgerBtn">Export Ledger (CSV)</span>
+              <span data-i18n="exportLedgerBtn">Export Ledger (CSV)</span>
             </button>
             <button class="btn-export" onclick="exportLogsCSV()" title="Export Security Audit Logs as CSV Spreadsheet">
-              📥 <span data-i18n="exportLogsBtn">Export Logs (CSV)</span>
+              <span data-i18n="exportLogsBtn">Export Logs (CSV)</span>
             </button>
           </div>
         </div>
 
         <div class="admin-tabs">
           <button class="admin-tab-btn active" id="tab-btn-audit" onclick="switchAdminTab('audit')" data-i18n="tabAudit">Security Audit Trail & Bills</button>
-          <button class="admin-tab-btn" id="tab-btn-analytics" onclick="switchAdminTab('analytics')" data-i18n="tabAnalytics">📊 Category Analytics</button>
+          <button class="admin-tab-btn" id="tab-btn-analytics" onclick="switchAdminTab('analytics')" data-i18n="tabAnalytics">Category Analytics</button>
           <button class="admin-tab-btn" id="tab-btn-approvals" onclick="switchAdminTab('approvals')">
-            🔔 <span data-i18n="tabApprovals">Pending Approvals</span> <span id="admin-notif-badge" class="notif-badge hidden">0</span>
+            <span data-i18n="tabApprovals">Pending Approvals</span> <span id="admin-notif-badge" class="notif-badge hidden">0</span>
           </button>
           <button class="admin-tab-btn" id="tab-btn-staff" onclick="switchAdminTab('staff')" data-i18n="tabStaff">Staff Accounts</button>
         </div>
@@ -245,7 +244,7 @@
         <!-- Tab 3: Pending Approvals (Staff Accounts + Custom Items) -->
         <div id="admin-panel-approvals" class="admin-panel hidden">
           <div class="approval-section">
-            <h3 class="approval-heading">⏳ Pending Staff Account Approvals</h3>
+            <h3 class="approval-heading">Pending Staff Account Approvals</h3>
             <div class="table-wrapper">
               <table class="admin-table">
                 <thead>
@@ -264,7 +263,7 @@
           </div>
 
           <div class="approval-section" style="margin-top: 2rem;">
-            <h3 class="approval-heading">🏷️ Pending Custom Item / Category Requests</h3>
+            <h3 class="approval-heading">Pending Custom Item / Category Requests</h3>
             <div class="table-wrapper">
               <table class="admin-table">
                 <thead>
@@ -319,8 +318,8 @@
       <div class="transaction-type-wrapper">
         <label class="toggle-label" data-i18n="txTypeLabel">Select Batch Transaction Type:</label>
         <div class="transaction-type-toggle">
-          <button id="btn-type-in" class="type-btn active" onclick="setTransactionType('IN')">🟢 STOCK IN (Received)</button>
-          <button id="btn-type-out" class="type-btn" onclick="setTransactionType('OUT')">🔴 STOCK OUT (Dispatched)</button>
+          <button id="btn-type-in" class="type-btn active" onclick="setTransactionType('IN')">STOCK IN (Received)</button>
+          <button id="btn-type-out" class="type-btn" onclick="setTransactionType('OUT')">STOCK OUT (Dispatched)</button>
         </div>
       </div>
 
@@ -331,7 +330,7 @@
 
       <!-- Mandatory Security Verification Box -->
       <div class="cart-security-box">
-        <h4 class="security-heading">🔒 <span data-i18n="securityHeading">Security Verification (Mandatory)</span></h4>
+        <h4 class="security-heading">Security Verification (Mandatory)</h4>
         <p class="security-note" data-i18n="securityNote">You must capture and attach a physical bill receipt or gate pass photo to unlock submission.</p>
         
         <div class="form-group">
@@ -341,16 +340,16 @@
         <div class="photo-capture-area">
           <input type="file" id="cart-photo-file" accept="image/*" capture="environment" class="hidden" onchange="handleCartPhotoCaptured(event)">
           <button class="btn-camera" onclick="document.getElementById('cart-photo-file').click()" type="button" id="btn-cart-camera">
-            📷 <span data-i18n="capturePhotoBtn">Capture Bill / Permission Photo *</span>
+            Capture Bill / Permission Photo *
           </button>
-          <div id="cart-photo-status" class="photo-status hidden">✅ <span data-i18n="photoAttachedText">Verified Receipt Attached</span></div>
+          <div id="cart-photo-status" class="photo-status hidden">Verified Receipt Attached</div>
         </div>
       </div>
 
       <!-- Cart Footer & Submit Trigger -->
       <div class="cart-footer">
         <button id="btn-submit-cart" class="btn-submit-cart disabled" disabled onclick="submitBatchCart()">
-          🔒 <span id="submit-btn-text" data-i18n="attachPhotoUnlockText">Attach Photo & Bill No. to Unlock</span>
+          <span id="submit-btn-text" data-i18n="attachPhotoUnlockText">Attach Photo & Bill No. to Unlock</span>
         </button>
       </div>
     </div>

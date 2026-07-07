@@ -81,12 +81,15 @@ function initApp() {
   // Seed staff accounts if empty
   if (staffAccounts.length === 0) {
     staffAccounts = [
-      { id: 'staff-1', name: 'Kumar - Kitchen Supervisor', email: 'kumar@sreeambal.com', status: 'Approved', regTime: '2026-07-01' },
-      { id: 'staff-2', name: 'Ramesh - Storekeeper', email: 'ramesh@sreeambal.com', status: 'Approved', regTime: '2026-07-02' },
-      { id: 'staff-3', name: 'Anand - Delivery Lead', email: 'anand@sreeambal.com', status: 'Pending Approval', regTime: '2026-07-05' }
+      { id: 'staff-1', name: 'Kumar - Kitchen Supervisor', email: 'kumar@sreeambal.com', status: 'Approved', regTime: '2026-07-01', pin: '1111' },
+      { id: 'staff-2', name: 'Ramesh - Storekeeper', email: 'ramesh@sreeambal.com', status: 'Approved', regTime: '2026-07-02', pin: '2222' },
+      { id: 'staff-3', name: 'Anand - Delivery Lead', email: 'anand@sreeambal.com', status: 'Pending Approval', regTime: '2026-07-05', pin: '3333' }
     ];
     saveStaffAccounts();
   }
+
+  // Fetch live staff accounts from database in background
+  fetchStaffAccounts();
 
   // Apply multilingual translations
   if (typeof applyTranslations === 'function') applyTranslations();
@@ -297,7 +300,22 @@ function closeRegisterModal() {
   document.getElementById('register-modal').classList.add('hidden');
 }
 
-function submitRegistration() {
+async function fetchStaffAccounts() {
+  if (supabaseClient && navigator.onLine) {
+    try {
+      const { data, error } = await supabaseClient.from('staff_accounts').select('*');
+      if (!error && data && Array.isArray(data)) {
+        staffAccounts = data;
+        saveStaffAccounts();
+        if (currentUserRole === 'admin') renderAdminDashboard();
+      }
+    } catch (err) {
+      console.warn('[Staff Accounts Fetch Exception]:', err);
+    }
+  }
+}
+
+async function submitRegistration() {
   const username = document.getElementById('reg-username').value.trim();
   const email = document.getElementById('reg-email').value.trim();
   const password = document.getElementById('reg-password').value.trim();
@@ -312,12 +330,16 @@ function submitRegistration() {
     return;
   }
 
+  // Generate a random 4-digit PIN for new registration
+  const pin = Math.floor(1000 + Math.random() * 9000).toString();
+
   const newAcc = {
     id: `staff-${Date.now()}`,
     name: username,
     email: email,
     status: 'Pending Approval',
-    regTime: new Date().toISOString().split('T')[0]
+    regTime: new Date().toISOString().split('T')[0],
+    pin: pin
   };
 
   staffAccounts.push(newAcc);
@@ -330,7 +352,17 @@ function submitRegistration() {
   localStorage.setItem('sreeambal_user_role', 'pending');
   
   routeToActiveRole();
-  showToast('Account registered! Waiting for admin approval.', 'info');
+  showToast(`Account registered! Your login PIN is: ${pin} (Pending approval)`, 'info');
+
+  // Insert into Supabase
+  if (supabaseClient && navigator.onLine) {
+    try {
+      await supabaseClient.from('staff_accounts').insert([newAcc]);
+    } catch (err) {
+      console.warn('[Staff Accounts Supabase Insert Exception]:', err);
+    }
+  }
+
   broadcastAdminUpdate('new_registration', newAcc);
 }
 
@@ -475,15 +507,15 @@ function renderCatalogGrid() {
     const dbEntry = inventoryData.find(d => d.name.toLowerCase() === item.names.en.toLowerCase() || d.name.toLowerCase() === displayName.toLowerCase());
     const currentQty = dbEntry ? dbEntry.qty : 0;
 
-    let icon = '📦';
-    if (item.category === 'grains') icon = '🌾';
-    else if (item.category === 'spices') icon = '🌶️';
-    else if (item.category === 'oils') icon = '🛢️';
-    else if (item.category === 'sweeteners') icon = '🍯';
-    else if (item.category === 'perishables') icon = '🥬';
-    else if (item.category === 'dairy') icon = '🥛';
-    else if (item.category === 'nuts') icon = '🥜';
-    else if (item.category === 'utensils') icon = '🥘';
+    let icon = 'IN';
+    if (item.category === 'grains') icon = 'GR';
+    else if (item.category === 'spices') icon = 'SP';
+    else if (item.category === 'oils') icon = 'OL';
+    else if (item.category === 'sweeteners') icon = 'SW';
+    else if (item.category === 'perishables') icon = 'VE';
+    else if (item.category === 'dairy') icon = 'DA';
+    else if (item.category === 'nuts') icon = 'NU';
+    else if (item.category === 'utensils') icon = 'UT';
 
     card.innerHTML = `
       <div class="card-header">
@@ -834,32 +866,60 @@ function saveStaffAccounts() {
   localStorage.setItem('sreeambal_staff_accounts', JSON.stringify(staffAccounts));
 }
 
-function approveUserAccount(id) {
+async function approveUserAccount(id) {
   const acc = staffAccounts.find(s => s.id === id);
   if (acc) {
     acc.status = 'Approved';
     saveStaffAccounts();
     renderAdminDashboard();
     showToast(`Approved access for user: ${acc.name}`, 'info');
+
+    // Update in Supabase
+    if (supabaseClient && navigator.onLine) {
+      try {
+        await supabaseClient.from('staff_accounts').update({ status: 'Approved' }).eq('id', id);
+      } catch (err) {
+        console.warn('[Staff Accounts Supabase Update Exception]:', err);
+      }
+    }
     broadcastAdminUpdate('user_approved', acc);
   }
 }
 
-function rejectUserAccount(id) {
+async function rejectUserAccount(id) {
   const acc = staffAccounts.find(s => s.id === id);
   if (acc) {
     acc.status = 'Rejected';
     saveStaffAccounts();
     renderAdminDashboard();
     showToast(`Rejected account: ${acc.name}`, 'error');
+
+    // Update in Supabase
+    if (supabaseClient && navigator.onLine) {
+      try {
+        await supabaseClient.from('staff_accounts').update({ status: 'Rejected' }).eq('id', id);
+      } catch (err) {
+        console.warn('[Staff Accounts Supabase Update Exception]:', err);
+      }
+    }
+    broadcastAdminUpdate('user_rejected', acc);
   }
 }
 
-function deleteUserAccount(id) {
+async function deleteUserAccount(id) {
   staffAccounts = staffAccounts.filter(s => s.id !== id);
   saveStaffAccounts();
   renderAdminDashboard();
   showToast('Staff account removed.', 'info');
+
+  // Delete in Supabase
+  if (supabaseClient && navigator.onLine) {
+    try {
+      await supabaseClient.from('staff_accounts').delete().eq('id', id);
+    } catch (err) {
+      console.warn('[Staff Accounts Supabase Delete Exception]:', err);
+    }
+  }
 }
 
 function approveCustomItem(id) {
@@ -900,14 +960,14 @@ function renderCategoryCharts() {
   if (!container) return;
 
   const categories = [
-    { key: 'grains', label: '🌾 Grains & Pulses' },
-    { key: 'spices', label: '🌶️ Spices & Masalas' },
-    { key: 'oils', label: '🛢️ Oils & Ghee' },
-    { key: 'sweeteners', label: '🍯 Sweeteners & Acidulants' },
-    { key: 'perishables', label: '🥬 Vegetables & Perishables' },
-    { key: 'dairy', label: '🥛 Dairy & Provisions' },
-    { key: 'nuts', label: '🥜 Nuts & Dry Fruits' },
-    { key: 'utensils', label: '🥘 Utensils & Equipment' }
+    { key: 'grains', label: 'Grains & Pulses' },
+    { key: 'spices', label: 'Spices & Masalas' },
+    { key: 'oils', label: 'Oils & Ghee' },
+    { key: 'sweeteners', label: 'Sweeteners & Acidulants' },
+    { key: 'perishables', label: 'Vegetables & Perishables' },
+    { key: 'dairy', label: 'Dairy & Provisions' },
+    { key: 'nuts', label: 'Nuts & Dry Fruits' },
+    { key: 'utensils', label: 'Utensils & Equipment' }
   ];
 
   // Calculate volume per category
@@ -961,7 +1021,7 @@ function exportLedgerCSV() {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  showToast('📥 Inventory Ledger downloaded as CSV spreadsheet!', 'info');
+  showToast('Inventory Ledger downloaded as CSV spreadsheet!', 'info');
 }
 
 function exportLogsCSV() {
@@ -983,7 +1043,7 @@ function exportLogsCSV() {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  showToast('📥 Security Audit Logs downloaded as CSV spreadsheet!', 'info');
+  showToast('Security Audit Logs downloaded as CSV spreadsheet!', 'info');
 }
 
 /**
@@ -1012,6 +1072,7 @@ function viewCapturedPhoto(auditId) {
 function setupRealtimeChannels() {
   if (!supabaseClient) return;
   try {
+    // 1. Listen for dynamic catalog updates
     supabaseClient
       .channel('public:inventory_ledger')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory_ledger' }, (payload) => {
@@ -1020,19 +1081,77 @@ function setupRealtimeChannels() {
       })
       .subscribe();
 
+    // 2. Listen for staff accounts table updates
+    supabaseClient
+      .channel('public:staff_accounts')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'staff_accounts' }, (payload) => {
+        console.log('[Realtime] Staff accounts update detected:', payload);
+        fetchStaffAccounts().then(() => {
+          // Auto check if this changes current user's approval status
+          if (currentUserRole === 'pending') {
+            const me = staffAccounts.find(s => s.name.toLowerCase() === currentStaffName.toLowerCase());
+            if (me && me.status === 'Approved') {
+              currentUserRole = 'staff';
+              localStorage.setItem('sreeambal_user_role', 'staff');
+              routeToActiveRole();
+              showToast(`Welcome back, ${currentStaffName}!`, 'info');
+            }
+          }
+        });
+      })
+      .subscribe();
+
+    // 3. Realtime Peer-to-Peer Admin Broadcast Channel
     const adminChannel = supabaseClient.channel('sreeambal_admin_broadcast');
-    adminChannel.on('broadcast', { event: 'new_audit' }, (payload) => {
-      if (payload.payload && !auditLogs.some(l => l.id === payload.payload.id)) {
-        auditLogs.unshift(payload.payload);
-        if (auditLogs.length > 50) auditLogs.pop();
-        localStorage.setItem('sreeambal_audit_logs', JSON.stringify(auditLogs));
-        if (currentUserRole === 'admin') {
-          renderAdminDashboard();
-          showToast(`🔔 Alert: ${payload.payload.staff} logged batch ${payload.payload.type}`, 'info');
+    adminChannel
+      .on('broadcast', { event: 'new_audit' }, (payload) => {
+        if (payload.payload && !auditLogs.some(l => l.id === payload.payload.id)) {
+          auditLogs.unshift(payload.payload);
+          if (auditLogs.length > 50) auditLogs.pop();
+          localStorage.setItem('sreeambal_audit_logs', JSON.stringify(auditLogs));
+          if (currentUserRole === 'admin') {
+            renderAdminDashboard();
+            showToast(`Alert: ${payload.payload.staff} logged batch ${payload.payload.type}`, 'info');
+          }
         }
-      }
-    }).subscribe();
-  } catch (err) {}
+      })
+      .on('broadcast', { event: 'new_registration' }, (payload) => {
+        if (payload.payload && !staffAccounts.some(s => s.id === payload.payload.id)) {
+          staffAccounts.push(payload.payload);
+          saveStaffAccounts();
+          if (currentUserRole === 'admin') {
+            renderAdminDashboard();
+            showToast(`New staff registration: ${payload.payload.name}`, 'info');
+          }
+        }
+      })
+      .on('broadcast', { event: 'user_approved' }, (payload) => {
+        const approvedUser = payload.payload;
+        if (approvedUser) {
+          let acc = staffAccounts.find(s => s.id === approvedUser.id);
+          if (acc) {
+            acc.status = 'Approved';
+          } else {
+            staffAccounts.push(approvedUser);
+          }
+          saveStaffAccounts();
+          
+          // Auto-login staff if this device is waiting for this user approval!
+          if (currentUserRole === 'pending' && currentStaffName.toLowerCase() === approvedUser.name.toLowerCase()) {
+            currentUserRole = 'staff';
+            localStorage.setItem('sreeambal_user_role', 'staff');
+            routeToActiveRole();
+            showToast(`Welcome back, ${currentStaffName}!`, 'info');
+          }
+          if (currentUserRole === 'admin') {
+            renderAdminDashboard();
+          }
+        }
+      })
+      .subscribe();
+  } catch (err) {
+    console.warn('[Realtime Setup Exception]:', err);
+  }
 }
 
 function broadcastAdminUpdate(event, data) {
@@ -1051,7 +1170,7 @@ function showToast(message, type = 'info') {
 
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
-  toast.innerHTML = `<span>${type === 'error' ? '⚠️' : '✅'}</span> <span>${message}</span>`;
+  toast.innerHTML = `<span>[${type.toUpperCase()}]</span> <span>${message}</span>`;
   container.appendChild(toast);
 
   setTimeout(() => {
