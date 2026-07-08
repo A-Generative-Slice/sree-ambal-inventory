@@ -558,9 +558,7 @@ function renderCatalogGrid() {
   const currentLang = typeof localStorage !== 'undefined' ? localStorage.getItem('sreeambal_lang') || 'en' : 'en';
 
   const filtered = activeCatalog.filter(item => {
-    // Category check
     if (currentCategoryFilter !== 'all' && item.category !== currentCategoryFilter) return false;
-    // Search query check
     if (!currentSearchQuery) return true;
     
     const names = item.names || {};
@@ -570,7 +568,7 @@ function renderCatalogGrid() {
   });
 
   if (filtered.length === 0) {
-    grid.innerHTML = `<div class="empty-cell" style="grid-column: 1/-1;">No matching South Indian catering materials found. Click '+ Request New Item' to add!</div>`;
+    grid.innerHTML = `<div class="empty-cell" style="grid-column: 1/-1;">No matching materials found. Click '+ Request New Item' to add!</div>`;
     return;
   }
 
@@ -578,10 +576,7 @@ function renderCatalogGrid() {
     const card = document.createElement('div');
     card.className = `inventory-card item-${item.category}`;
 
-    // Get display name in current language or fallback to EN
     const displayName = (item.names && item.names[currentLang]) ? item.names[currentLang] : (item.names.en || item.id);
-    
-    // Find current database ledger balance
     const dbEntry = inventoryData.find(d => d.name.toLowerCase() === item.names.en.toLowerCase() || d.name.toLowerCase() === displayName.toLowerCase());
     const currentQty = dbEntry ? dbEntry.qty : 0;
 
@@ -608,36 +603,317 @@ function renderCatalogGrid() {
       </div>
 
       <div class="card-balance">
-        <span class="balance-label">Ledger Balance</span>
+        <span class="balance-label">Current Ledger Balance</span>
         <div>
           <span class="qty-val">${currentQty}</span>
           <span class="qty-unit">${item.defaultUnit}</span>
         </div>
       </div>
 
-      <!-- Synchronized Slider and Numeric Input Box -->
-      <div class="item-slider-box">
-        <div class="slider-row">
-          <input type="range" id="slider-${item.id}" class="custom-range-slider" min="1" max="100" value="15" oninput="syncSliderVal('${item.id}', this.value)">
-          <input type="number" id="num-${item.id}" class="numeric-input-box" min="1" max="10000" value="15" oninput="syncNumVal('${item.id}', this.value)">
-          <span style="color: var(--text-gold); font-weight: 700;">${item.defaultUnit}</span>
-        </div>
-        <button class="btn-add-cart" onclick="addToBatchCart('${item.id}', '${displayName.replace(/'/g,"\\'")} ', '${item.names.en.replace(/'/g,"\\'")} ', '${item.category}', '${item.defaultUnit}')">
-          ➕ Add to Batch Cart
-        </button>
-      </div>
+      <button class="btn-select-item" onclick="openQtyModal('${item.id}', '${displayName.replace(/'/g,"\\'")} ', '${item.names.en.replace(/'/g,"\\'")} ', '${item.category}', '${item.defaultUnit}')">
+        + Select Quantity & Scale
+      </button>
     `;
 
     grid.appendChild(card);
   });
 }
 
-function syncSliderVal(itemId, val) {
-  const numBox = document.getElementById(`num-${itemId}`);
-  if (numBox) numBox.value = val;
+/* ============================================================================
+   STEP-BY-STEP STAFF MOBILE WIZARD NAVIGATION & SCALE MODALS
+   ============================================================================ */
+let currentTxType = 'IN'; // 'IN' or 'OUT'
+let activeItemSelection = null;
+let finalizePhotoBase64 = null;
+
+function openTxTypeSelector() {
+  const modal = document.getElementById('modal-select-tx-type');
+  if (modal) modal.classList.remove('hidden');
 }
 
-function syncNumVal(itemId, val) {
+function closeTxTypeSelector() {
+  const modal = document.getElementById('modal-select-tx-type');
+  if (modal) modal.classList.add('hidden');
+}
+
+function selectTxType(type) {
+  currentTxType = type;
+  closeTxTypeSelector();
+
+  const hub = document.getElementById('staff-step-hub');
+  const picker = document.getElementById('staff-step-picker');
+  const badge = document.getElementById('active-tx-badge');
+
+  if (hub) hub.classList.add('hidden');
+  if (picker) picker.classList.remove('hidden');
+
+  if (badge) {
+    badge.className = type === 'IN' ? 'tx-badge tx-in' : 'tx-badge tx-out';
+    badge.textContent = type === 'IN' ? '📥 STOCK IN (Incoming Delivery)' : '📤 STOCK OUT (Kitchen Dispatch)';
+  }
+
+  renderCatalogGrid();
+  updateStickyBatchBar();
+}
+
+function backToStaffHub() {
+  const hub = document.getElementById('staff-step-hub');
+  const picker = document.getElementById('staff-step-picker');
+  if (picker) picker.classList.add('hidden');
+  if (hub) hub.classList.remove('hidden');
+}
+
+function openQtyModal(itemId, displayName, englishName, category, unit) {
+  activeItemSelection = {
+    id: itemId,
+    displayName: displayName.trim(),
+    englishName: englishName.trim(),
+    category: category,
+    unit: unit
+  };
+
+  const modal = document.getElementById('modal-item-qty');
+  const title = document.getElementById('qty-modal-title');
+  const sub = document.getElementById('qty-modal-sub');
+  const inp = document.getElementById('qty-modal-input');
+  const unitLabel = document.getElementById('qty-modal-unit');
+
+  if (title) title.textContent = activeItemSelection.displayName;
+  if (sub) sub.textContent = `Mode: ${currentTxType === 'IN' ? '📥 STOCK IN' : '📤 STOCK OUT'} — Enter quantity in ${unit}`;
+  if (unitLabel) unitLabel.textContent = unit;
+  if (inp) inp.value = 1;
+
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeQtyModal() {
+  const modal = document.getElementById('modal-item-qty');
+  if (modal) modal.classList.add('hidden');
+  activeItemSelection = null;
+}
+
+function addQuickQty(val) {
+  const inp = document.getElementById('qty-modal-input');
+  if (!inp) return;
+  const current = parseFloat(inp.value) || 0;
+  inp.value = (current + val);
+}
+
+function confirmItemQtyToBatch() {
+  if (!activeItemSelection) return;
+  const inp = document.getElementById('qty-modal-input');
+  const qtyVal = parseFloat(inp ? inp.value : 0);
+
+  if (!qtyVal || qtyVal <= 0) {
+    showToast('Please enter a valid quantity greater than 0', 'error');
+    return;
+  }
+
+  const existingIdx = batchCart.findIndex(c => c.id === activeItemSelection.id && c.txType === currentTxType);
+  if (existingIdx >= 0) {
+    batchCart[existingIdx].qty += qtyVal;
+  } else {
+    batchCart.push({
+      id: activeItemSelection.id,
+      name: activeItemSelection.displayName,
+      englishName: activeItemSelection.englishName,
+      category: activeItemSelection.category,
+      unit: activeItemSelection.unit,
+      qty: qtyVal,
+      txType: currentTxType
+    });
+  }
+
+  closeQtyModal();
+  showToast(`Added ${qtyVal} ${activeItemSelection.unit} of ${activeItemSelection.displayName} (${currentTxType})`, 'success');
+  updateStickyBatchBar();
+}
+
+function updateStickyBatchBar() {
+  const stickyBar = document.getElementById('sticky-batch-bar');
+  const cartBadge = document.getElementById('cart-badge');
+  if (!stickyBar) return;
+
+  if (batchCart.length > 0) {
+    stickyBar.classList.remove('hidden');
+    if (cartBadge) cartBadge.textContent = batchCart.length;
+  } else {
+    stickyBar.classList.add('hidden');
+  }
+}
+
+function openFinalizeBatchModal() {
+  const modal = document.getElementById('modal-finalize-batch');
+  const listEl = document.getElementById('finalize-items-list');
+  if (!modal || !listEl) return;
+
+  listEl.innerHTML = '';
+  batchCart.forEach((item, idx) => {
+    const row = document.createElement('div');
+    row.className = 'finalize-item-row';
+    const txLabel = item.txType === 'IN' ? '📥 IN' : '📤 OUT';
+    row.innerHTML = `
+      <div>
+        <div class="finalize-item-title">${item.name}</div>
+        <div style="font-size:0.75rem; color:var(--text-muted);">${txLabel}</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span class="finalize-item-qty">${item.qty} ${item.unit}</span>
+        <button class="btn-remove-item" onclick="removeFromBatchCart(${idx})" title="Remove item">🗑</button>
+      </div>
+    `;
+    listEl.appendChild(row);
+  });
+
+  modal.classList.remove('hidden');
+}
+
+function closeFinalizeBatchModal() {
+  const modal = document.getElementById('modal-finalize-batch');
+  if (modal) modal.classList.add('hidden');
+}
+
+function removeFromBatchCart(index) {
+  batchCart.splice(index, 1);
+  if (batchCart.length === 0) {
+    closeFinalizeBatchModal();
+  } else {
+    openFinalizeBatchModal();
+  }
+  updateStickyBatchBar();
+}
+
+function handleFinalizePhoto(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const MAX_WIDTH = 500;
+      let width = img.width;
+      let height = img.height;
+      if (width > MAX_WIDTH) {
+        height *= MAX_WIDTH / width;
+        width = MAX_WIDTH;
+      }
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      finalizePhotoBase64 = canvas.toDataURL('image/jpeg', 0.6);
+      const statusEl = document.getElementById('finalize-photo-status');
+      if (statusEl) statusEl.classList.remove('hidden');
+      showToast('Bill photo captured & compressed!', 'success');
+    };
+    img.src = event.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function submitWizardBatchLog() {
+  if (batchCart.length === 0) {
+    showToast('Your batch list is empty!', 'error');
+    return;
+  }
+
+  const billNoInp = document.getElementById('finalize-bill-no');
+  const remarksInp = document.getElementById('finalize-remarks');
+  const billNo = billNoInp ? billNoInp.value.trim() : '';
+  const remarks = remarksInp ? remarksInp.value.trim() : '';
+
+  if (!billNo) {
+    showToast('Mandatory: Please enter Bill / Challan Number!', 'error');
+    if (billNoInp) billNoInp.focus();
+    return;
+  }
+
+  if (!remarks) {
+    showToast('Mandatory: Please mention remarks / notes for this log!', 'error');
+    if (remarksInp) remarksInp.focus();
+    return;
+  }
+
+  const btn = document.getElementById('btn-submit-wizard');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Saving to Firestore...';
+  }
+
+  const itemsPayload = batchCart.map(c => ({
+    id: c.id,
+    name: c.name,
+    englishName: c.englishName,
+    category: c.category,
+    unit: c.unit,
+    qty: c.qty,
+    txType: c.txType
+  }));
+
+  // Update LEDGER BALANCES
+  itemsPayload.forEach(item => {
+    const idx = inventoryData.findIndex(d => d.name.toLowerCase() === item.englishName.toLowerCase() || d.name.toLowerCase() === item.name.toLowerCase());
+    if (idx >= 0) {
+      if (item.txType === 'IN') {
+        inventoryData[idx].qty = Number((inventoryData[idx].qty + item.qty).toFixed(2));
+      } else {
+        inventoryData[idx].qty = Math.max(0, Number((inventoryData[idx].qty - item.qty).toFixed(2)));
+      }
+    } else {
+      inventoryData.push({
+        name: item.englishName || item.name,
+        category: item.category,
+        unit: item.unit,
+        qty: item.txType === 'IN' ? item.qty : 0
+      });
+    }
+  });
+
+  await persistInventoryLedger();
+
+  // Create audit log entry
+  const now = new Date();
+  const logEntry = {
+    id: 'log-' + Date.now(),
+    timestamp: now.toISOString(),
+    displayTime: now.toLocaleString('en-IN'),
+    staffName: currentStaffName || 'Staff User',
+    billNumber: billNo,
+    photoData: finalizePhotoBase64 || null,
+    remarks: remarks,
+    items: itemsPayload
+  };
+
+  auditLogs.unshift(logEntry);
+
+  if (db && !isOfflineMode) {
+    try {
+      await db.collection('audit_logs').doc(logEntry.id).set(logEntry);
+    } catch (e) {
+      console.warn('Offline: saved log to local cache', e);
+    }
+  }
+
+  broadcastAdminUpdate('audit', logEntry);
+
+  // Reset cart and wizard
+  batchCart = [];
+  finalizePhotoBase64 = null;
+  if (billNoInp) billNoInp.value = '';
+  if (remarksInp) remarksInp.value = '';
+  const photoStatus = document.getElementById('finalize-photo-status');
+  if (photoStatus) photoStatus.classList.add('hidden');
+
+  if (btn) {
+    btn.disabled = false;
+    btn.textContent = '🚀 Submit Log & Notify Admin';
+  }
+
+  closeFinalizeBatchModal();
+  backToStaffHub();
+  showToast(`✅ Successfully recorded Stock Log (#${billNo}) and notified Admin!`, 'success');
+}
   const slider = document.getElementById(`slider-${itemId}`);
   if (slider && val <= 100) slider.value = val;
 }
