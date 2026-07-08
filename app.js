@@ -723,8 +723,10 @@ function confirmItemQtyToBatch() {
     });
   }
 
+  const selUnit = activeItemSelection.unit;
+  const selName = activeItemSelection.displayName;
   closeQtyModal();
-  showToast(`Added ${qtyVal} ${activeItemSelection.unit} of ${activeItemSelection.displayName} (${currentTxType})`, 'success');
+  showToast(`Added ${qtyVal} ${selUnit} of ${selName} (${currentTxType})`, 'success');
   updateStickyBatchBar();
 }
 
