@@ -622,7 +622,6 @@ function renderCatalogGrid() {
 /* ============================================================================
    STEP-BY-STEP STAFF MOBILE WIZARD NAVIGATION & SCALE MODALS
    ============================================================================ */
-let currentTxType = 'IN'; // 'IN' or 'OUT'
 let activeItemSelection = null;
 let finalizePhotoBase64 = null;
 
@@ -913,9 +912,6 @@ async function submitWizardBatchLog() {
   closeFinalizeBatchModal();
   backToStaffHub();
   showToast(`✅ Successfully recorded Stock Log (#${billNo}) and notified Admin!`, 'success');
-}
-  const slider = document.getElementById(`slider-${itemId}`);
-  if (slider && val <= 100) slider.value = val;
 }
 
 /**
