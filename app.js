@@ -871,7 +871,28 @@ async function submitWizardBatchLog() {
     }
   });
 
-  await persistInventoryLedger();
+  localStorage.setItem('sreeambal_inventory_cache', JSON.stringify(inventoryData));
+
+  if (navigator.onLine && db) {
+    try {
+      const batch = db.batch();
+      for (const cartItem of batchCart) {
+        const dbEntry = inventoryData.find(d => d.name.toLowerCase() === cartItem.englishName.toLowerCase());
+        const targetQty = dbEntry ? dbEntry.qty : cartItem.qty;
+
+        const docId = cartItem.englishName.replace(/\s+/g, '_').toLowerCase();
+        const docRef = db.collection('inventory_ledger').doc(docId);
+        
+        batch.set(docRef, {
+          item_name: cartItem.englishName,
+          quantity_kg: targetQty
+        }, { merge: true });
+      }
+      await batch.commit();
+    } catch (err) {
+      console.warn('Offline/Error saving ledger batch to Firestore:', err);
+    }
+  }
 
   // Create audit log entry
   const now = new Date();
