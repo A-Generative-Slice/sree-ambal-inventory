@@ -111,8 +111,9 @@ function initApp() {
     saveStaffAccounts();
   }
 
-  // Fetch live staff accounts from database in background
+  // Fetch live staff accounts and audit logs from database in background
   fetchStaffAccounts();
+  fetchAuditLogs();
 
   // Apply multilingual translations
   if (typeof applyTranslations === 'function') applyTranslations();
@@ -336,6 +337,25 @@ async function fetchStaffAccounts() {
       }
     } catch (err) {
       console.warn('[Staff Accounts Fetch Exception]:', err);
+    }
+}
+
+async function fetchAuditLogs() {
+  if (db && navigator.onLine) {
+    try {
+      const snapshot = await db.collection('audit_logs').get();
+      const logs = [];
+      snapshot.forEach(doc => logs.push(doc.data()));
+      if (logs.length > 0) {
+        logs.sort((a, b) => (b.id || '').localeCompare(a.id || ''));
+        auditLogs = logs;
+        try {
+          localStorage.setItem('sreeambal_audit_logs', JSON.stringify(auditLogs));
+        } catch(e) {}
+        if (currentUserRole === 'admin') renderAdminDashboard();
+      }
+    } catch (err) {
+      console.warn('[Audit Logs Fetch Exception]:', err);
     }
   }
 }
@@ -673,13 +693,35 @@ function handleCartPhotoCaptured(event) {
 
   const reader = new FileReader();
   reader.onload = function(e) {
-    cartPhotoDataUrl = e.target.result;
-    const status = document.getElementById('cart-photo-status');
-    const btn = document.getElementById('btn-cart-camera');
-    if (status) status.classList.remove('hidden');
-    if (btn) btn.style.background = 'rgba(16, 185, 129, 0.3)';
-    showToast('✅ Security Photo Receipt Verified & Attached!', 'info');
-    checkCartUnlockState();
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const maxDim = 600; // Resize to max 600px for super fast Firestore & LocalStorage sync
+      let w = img.width;
+      let h = img.height;
+      if (w > maxDim || h > maxDim) {
+        if (w > h) {
+          h = Math.round((h * maxDim) / w);
+          w = maxDim;
+        } else {
+          w = Math.round((w * maxDim) / h);
+          h = maxDim;
+        }
+      }
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      cartPhotoDataUrl = canvas.toDataURL('image/jpeg', 0.65);
+
+      const status = document.getElementById('cart-photo-status');
+      const btn = document.getElementById('btn-cart-camera');
+      if (status) status.classList.remove('hidden');
+      if (btn) btn.style.background = 'rgba(16, 185, 129, 0.3)';
+      showToast('✅ Security Photo Receipt Compressed & Attached (~40KB)!', 'info');
+      checkCartUnlockState();
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
@@ -771,7 +813,17 @@ async function submitBatchCart() {
 
   auditLogs.unshift(logEntry);
   if (auditLogs.length > 50) auditLogs.pop();
-  localStorage.setItem('sreeambal_audit_logs', JSON.stringify(auditLogs));
+  try {
+    localStorage.setItem('sreeambal_audit_logs', JSON.stringify(auditLogs));
+  } catch(err) {
+    console.warn('[LocalStorage Quota] Could not save photo to localStorage, keeping in Firestore:', err);
+  }
+
+  if (db && navigator.onLine) {
+    db.collection('audit_logs').doc(logEntry.id).set(logEntry).catch(e => {
+      console.warn('[Firestore Audit Save Exception]:', e);
+    });
+  }
   broadcastAdminUpdate('new_audit', logEntry);
 
   // Clean up cart and form
@@ -949,6 +1001,40 @@ async function deleteUserAccount(id) {
       console.warn('[Staff Accounts Firestore Delete Exception]:', err);
     }
   }
+}
+
+async function resetAllTestData() {
+  if (!confirm("Are you sure you want to clean up all test accounts and audit logs? This will reset your dashboard cleanly for the client demo.")) return;
+
+  // 1. Reset local state
+  auditLogs = [];
+  try { localStorage.removeItem('sreeambal_audit_logs'); } catch(e){}
+
+  staffAccounts = [
+    { id: 'staff-1', name: 'Kumar - Kitchen Supervisor', email: 'kumar@sreeambal.com', status: 'Approved', regTime: '2026-07-01', pin: '1111' },
+    { id: 'staff-2', name: 'Ramesh - Storekeeper', email: 'ramesh@sreeambal.com', status: 'Approved', regTime: '2026-07-02', pin: '2222' }
+  ];
+  saveStaffAccounts();
+
+  // 2. Clear Firestore collections if online
+  if (db && navigator.onLine) {
+    try {
+      const logsSnap = await db.collection('audit_logs').get();
+      logsSnap.forEach(doc => doc.ref.delete());
+
+      const staffSnap = await db.collection('staff_accounts').get();
+      staffSnap.forEach(doc => {
+        if (doc.id !== 'staff-1' && doc.id !== 'staff-2') {
+          doc.ref.delete();
+        }
+      });
+    } catch(err) {
+      console.warn('[Reset Test Data Firestore Exception]:', err);
+    }
+  }
+
+  renderAdminDashboard();
+  showToast('✨ Cleaned all test accounts and audit logs!', 'info');
 }
 
 function approveCustomItem(id) {
@@ -1135,6 +1221,22 @@ function setupRealtimeChannels() {
       }
     }, (err) => {
       console.warn('[Realtime Staff Snapshot Error]:', err);
+    });
+
+    // 2.5. Listen for Audit Logs updates from Firestore
+    db.collection('audit_logs').onSnapshot((snapshot) => {
+      const logs = [];
+      snapshot.forEach(doc => logs.push(doc.data()));
+      if (logs.length > 0) {
+        logs.sort((a, b) => (b.id || '').localeCompare(a.id || ''));
+        auditLogs = logs;
+        try {
+          localStorage.setItem('sreeambal_audit_logs', JSON.stringify(auditLogs));
+        } catch(e) {}
+        if (currentUserRole === 'admin') renderAdminDashboard();
+      }
+    }, (err) => {
+      console.warn('[Realtime Audit Logs Snapshot Error]:', err);
     });
 
     // 3. Realtime Peer-to-Peer Admin Broadcast Channel (Simulated using broadcasts collection)
