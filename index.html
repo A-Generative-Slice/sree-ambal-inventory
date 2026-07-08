@@ -171,14 +171,27 @@
               </div>
               <div class="hub-card-arrow">➔</div>
             </div>
+
+            <!-- Active Batch Cart Shortcut Card -->
+            <div id="hub-card-cart" class="hub-card hub-card-cart hidden" onclick="openFinalizeBatchModal()">
+              <div class="hub-card-icon">🛒</div>
+              <div class="hub-card-content">
+                <h3>View Active Batch Cart (<span id="hub-cart-count">0</span> items)</h3>
+                <p>Review items, scan bill photo & add mandatory remarks to finalize log</p>
+              </div>
+              <div class="hub-card-arrow" style="color: #10b981;">➔</div>
+            </div>
           </div>
         </div>
 
-        <!-- STEP 2: PRODUCT PICKER & CATEGORY SUGGESTIONS -->
-        <div id="staff-step-picker" class="staff-step-picker hidden">
+        <!-- STEP 2: MULTILINGUAL PRODUCT PICKER & CATALOG -->
+        <div id="staff-step-picker" class="staff-picker hidden">
           <div class="picker-header-bar">
             <button class="btn-picker-back" onclick="backToStaffHub()">← Back to Hub</button>
             <div id="active-tx-badge" class="tx-badge tx-in">📥 STOCK IN</div>
+            <button id="top-cart-btn" class="btn-top-cart hidden" onclick="openFinalizeBatchModal()">
+              🛒 Cart (<span id="top-cart-badge">0</span>) ➔
+            </button>
           </div>
 
           <!-- Search & Filter Bar -->

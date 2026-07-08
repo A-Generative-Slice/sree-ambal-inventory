@@ -733,13 +733,22 @@ function confirmItemQtyToBatch() {
 function updateStickyBatchBar() {
   const stickyBar = document.getElementById('sticky-batch-bar');
   const cartBadge = document.getElementById('cart-badge');
-  if (!stickyBar) return;
+  const topCartBtn = document.getElementById('top-cart-btn');
+  const topCartBadge = document.getElementById('top-cart-badge');
+  const hubCartCard = document.getElementById('hub-card-cart');
+  const hubCartCount = document.getElementById('hub-cart-count');
 
   if (batchCart.length > 0) {
-    stickyBar.classList.remove('hidden');
+    if (stickyBar) stickyBar.classList.remove('hidden');
     if (cartBadge) cartBadge.textContent = batchCart.length;
+    if (topCartBtn) topCartBtn.classList.remove('hidden');
+    if (topCartBadge) topCartBadge.textContent = batchCart.length;
+    if (hubCartCard) hubCartCard.classList.remove('hidden');
+    if (hubCartCount) hubCartCount.textContent = batchCart.length;
   } else {
-    stickyBar.classList.add('hidden');
+    if (stickyBar) stickyBar.classList.add('hidden');
+    if (topCartBtn) topCartBtn.classList.add('hidden');
+    if (hubCartCard) hubCartCard.classList.add('hidden');
   }
 }
 
