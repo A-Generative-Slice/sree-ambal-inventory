@@ -5,15 +5,22 @@
  * ============================================================================
  */
 
-// Live Supabase Production Credentials (Preserved exactly as requested)
-const SUPABASE_URL = 'https://aylclmxjpylytezycihx.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_rxJkqKAHD1bPZFAD7ofIAA_DKZLCFtB';
+// Firebase Production Credentials (You can replace this placeholder with your own configuration)
+const firebaseConfig = {
+  apiKey: "AIzaSyDAlPb_MgAFlx1UyI1xIOrKCsO25Qm-wKM",
+  authDomain: "sree-ambal-catering.firebaseapp.com",
+  projectId: "sree-ambal-catering",
+  storageBucket: "sree-ambal-catering.firebasestorage.app",
+  messagingSenderId: "418935087027",
+  appId: "1:418935087027:web:89d80282a2d5358e8675c6",
+  measurementId: "G-WRK303ZBMY"
+};
 
 // Core Target Items & Seed Categories
 const TARGET_ITEMS = ['Sugar', 'Rice', 'Logistics Containers'];
 
 // State Management
-let supabaseClient = null;
+let db = null;
 let inventoryData = [];
 let activeCatalog = [];
 let batchCart = [];
@@ -70,12 +77,28 @@ function initApp() {
   window.addEventListener('offline', () => handleNetworkChange(false));
   handleNetworkChange(navigator.onLine);
 
-  // Initialize Supabase
-  if (window.supabase && window.supabase.createClient) {
-    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    setupRealtimeChannels();
+  // Initialize Firebase
+  if (typeof firebase !== 'undefined') {
+    try {
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+      
+      // Enable offline persistence for seamless offline experience
+      db.enablePersistence().catch((err) => {
+        if (err.code == 'failed-precondition') {
+          console.warn('[Firestore Persistence]: Multiple tabs open, persistence can only be enabled in one tab.');
+        } else if (err.code == 'unimplemented') {
+          console.warn('[Firestore Persistence]: The current browser does not support all of the features required.');
+        }
+      });
+      
+      setupRealtimeChannels();
+    } catch (err) {
+      console.warn('[Firebase Init Exception]:', err);
+      showToast('Offline Mode: Firebase SDK initialization failed', 'error');
+    }
   } else {
-    showToast('Offline Mode: Supabase SDK unreachable', 'error');
+    showToast('Offline Mode: Firebase SDK unreachable', 'error');
   }
 
   // Seed staff accounts if empty
@@ -301,10 +324,12 @@ function closeRegisterModal() {
 }
 
 async function fetchStaffAccounts() {
-  if (supabaseClient && navigator.onLine) {
+  if (db && navigator.onLine) {
     try {
-      const { data, error } = await supabaseClient.from('staff_accounts').select('*');
-      if (!error && data && Array.isArray(data)) {
+      const snapshot = await db.collection('staff_accounts').get();
+      const data = [];
+      snapshot.forEach(doc => data.push(doc.data()));
+      if (data.length > 0) {
         staffAccounts = data;
         saveStaffAccounts();
         if (currentUserRole === 'admin') renderAdminDashboard();
@@ -354,12 +379,12 @@ async function submitRegistration() {
   routeToActiveRole();
   showToast(`Account registered! Your login PIN is: ${pin} (Pending approval)`, 'info');
 
-  // Insert into Supabase
-  if (supabaseClient && navigator.onLine) {
+  // Insert into Firestore
+  if (db && navigator.onLine) {
     try {
-      await supabaseClient.from('staff_accounts').insert([newAcc]);
+      await db.collection('staff_accounts').doc(newAcc.id).set(newAcc);
     } catch (err) {
-      console.warn('[Staff Accounts Supabase Insert Exception]:', err);
+      console.warn('[Staff Accounts Firestore Insert Exception]:', err);
     }
   }
 
@@ -409,7 +434,7 @@ async function fetchInventory(silent = false) {
     if (inventoryGrid) inventoryGrid.classList.add('hidden');
   }
 
-  if (!navigator.onLine || !supabaseClient) {
+  if (!navigator.onLine || !db) {
     loadFromLocalStorage();
     return;
   }
@@ -420,20 +445,28 @@ async function fetchInventory(silent = false) {
       statusText.textContent = 'Syncing...';
     }
 
-    const { data, error } = await supabaseClient.from('inventory_ledger').select('*');
-    if (error) throw error;
+    const snapshot = await db.collection('inventory_ledger').get();
+    const data = [];
+    snapshot.forEach(doc => {
+      const row = doc.data();
+      data.push({
+        id: doc.id,
+        item_name: row.item_name || 'Unknown',
+        quantity_kg: row.quantity_kg || 0
+      });
+    });
 
     if (data && Array.isArray(data)) {
       inventoryData = data.map(row => ({
         id: row.id,
-        name: row.item_name || row.name || 'Unknown',
-        qty: Number(row.quantity_kg || row.quantity || 0)
+        name: row.item_name,
+        qty: Number(row.quantity_kg)
       }));
       localStorage.setItem('sreeambal_inventory_cache', JSON.stringify(inventoryData));
       if (currentUserRole === 'staff') renderCatalogGrid();
     }
   } catch (err) {
-    console.warn('[Supabase Fetch Exception]: Fallback to local:', err);
+    console.warn('[Firestore Fetch Exception]: Fallback to local:', err);
     loadFromLocalStorage();
   } finally {
     if (loadingContainer) loadingContainer.classList.add('hidden');
@@ -701,29 +734,25 @@ async function submitBatchCart() {
 
   localStorage.setItem('sreeambal_inventory_cache', JSON.stringify(inventoryData));
 
-  // Fire batch upsert to Supabase if online
-  if (navigator.onLine && supabaseClient) {
+  // Fire batch upsert to Firestore if online
+  if (navigator.onLine && db) {
     try {
+      const batch = db.batch();
       for (const cartItem of batchCart) {
         const dbEntry = inventoryData.find(d => d.name.toLowerCase() === cartItem.englishName.toLowerCase());
         const targetQty = dbEntry ? dbEntry.qty : cartItem.qty;
 
-        // Try update first
-        const { data: upRes, error: upErr } = await supabaseClient
-          .from('inventory_ledger')
-          .update({ quantity_kg: targetQty })
-          .eq('item_name', cartItem.englishName)
-          .select();
-
-        if (!upErr && (!upRes || upRes.length === 0)) {
-          // Fallback insert if not exists
-          await supabaseClient
-            .from('inventory_ledger')
-            .insert([{ item_name: cartItem.englishName, quantity_kg: targetQty }]);
-        }
+        const docId = cartItem.englishName.replace(/\s+/g, '_').toLowerCase();
+        const docRef = db.collection('inventory_ledger').doc(docId);
+        
+        batch.set(docRef, {
+          item_name: cartItem.englishName,
+          quantity_kg: targetQty
+        }, { merge: true });
       }
+      await batch.commit();
     } catch (err) {
-      console.warn('[Batch Supabase Exception]: Processed locally:', err);
+      console.warn('[Batch Firestore Exception]: Processed locally:', err);
     }
   }
 
@@ -874,12 +903,12 @@ async function approveUserAccount(id) {
     renderAdminDashboard();
     showToast(`Approved access for user: ${acc.name}`, 'info');
 
-    // Update in Supabase
-    if (supabaseClient && navigator.onLine) {
+    // Update in Firestore
+    if (db && navigator.onLine) {
       try {
-        await supabaseClient.from('staff_accounts').update({ status: 'Approved' }).eq('id', id);
+        await db.collection('staff_accounts').doc(id).update({ status: 'Approved' });
       } catch (err) {
-        console.warn('[Staff Accounts Supabase Update Exception]:', err);
+        console.warn('[Staff Accounts Firestore Update Exception]:', err);
       }
     }
     broadcastAdminUpdate('user_approved', acc);
@@ -894,12 +923,12 @@ async function rejectUserAccount(id) {
     renderAdminDashboard();
     showToast(`Rejected account: ${acc.name}`, 'error');
 
-    // Update in Supabase
-    if (supabaseClient && navigator.onLine) {
+    // Update in Firestore
+    if (db && navigator.onLine) {
       try {
-        await supabaseClient.from('staff_accounts').update({ status: 'Rejected' }).eq('id', id);
+        await db.collection('staff_accounts').doc(id).update({ status: 'Rejected' });
       } catch (err) {
-        console.warn('[Staff Accounts Supabase Update Exception]:', err);
+        console.warn('[Staff Accounts Firestore Update Exception]:', err);
       }
     }
     broadcastAdminUpdate('user_rejected', acc);
@@ -912,12 +941,12 @@ async function deleteUserAccount(id) {
   renderAdminDashboard();
   showToast('Staff account removed.', 'info');
 
-  // Delete in Supabase
-  if (supabaseClient && navigator.onLine) {
+  // Delete in Firestore
+  if (db && navigator.onLine) {
     try {
-      await supabaseClient.from('staff_accounts').delete().eq('id', id);
+      await db.collection('staff_accounts').doc(id).delete();
     } catch (err) {
-      console.warn('[Staff Accounts Supabase Delete Exception]:', err);
+      console.warn('[Staff Accounts Firestore Delete Exception]:', err);
     }
   }
 }
@@ -1069,96 +1098,121 @@ function viewCapturedPhoto(auditId) {
 /**
  * 14. Supabase Real-Time Channels
  */
+/**
+ * 14. Firebase Real-Time Synchronization & Broadcasts
+ */
 function setupRealtimeChannels() {
-  if (!supabaseClient) return;
+  if (!db) return;
   try {
     // 1. Listen for dynamic catalog updates
-    supabaseClient
-      .channel('public:inventory_ledger')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory_ledger' }, (payload) => {
-        console.log('[Realtime] Ledger update detected:', payload);
-        fetchInventory(true);
-      })
-      .subscribe();
+    db.collection('inventory_ledger').onSnapshot((snapshot) => {
+      console.log('[Realtime] Ledger update detected via Firestore snapshot');
+      fetchInventory(true);
+    }, (err) => {
+      console.warn('[Realtime Ledger Snapshot Error]:', err);
+    });
 
     // 2. Listen for staff accounts table updates
-    supabaseClient
-      .channel('public:staff_accounts')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'staff_accounts' }, (payload) => {
-        console.log('[Realtime] Staff accounts update detected:', payload);
-        fetchStaffAccounts().then(() => {
-          // Auto check if this changes current user's approval status
-          if (currentUserRole === 'pending') {
-            const me = staffAccounts.find(s => s.name.toLowerCase() === currentStaffName.toLowerCase());
-            if (me && me.status === 'Approved') {
-              currentUserRole = 'staff';
-              localStorage.setItem('sreeambal_user_role', 'staff');
-              routeToActiveRole();
-              showToast(`Welcome back, ${currentStaffName}!`, 'info');
-            }
-          }
-        });
-      })
-      .subscribe();
+    db.collection('staff_accounts').onSnapshot((snapshot) => {
+      console.log('[Realtime] Staff accounts update detected via Firestore snapshot');
+      const data = [];
+      snapshot.forEach(doc => data.push(doc.data()));
+      if (data.length > 0) {
+        staffAccounts = data;
+        saveStaffAccounts();
+        if (currentUserRole === 'admin') renderAdminDashboard();
 
-    // 3. Realtime Peer-to-Peer Admin Broadcast Channel
-    const adminChannel = supabaseClient.channel('sreeambal_admin_broadcast');
-    adminChannel
-      .on('broadcast', { event: 'new_audit' }, (payload) => {
-        if (payload.payload && !auditLogs.some(l => l.id === payload.payload.id)) {
-          auditLogs.unshift(payload.payload);
-          if (auditLogs.length > 50) auditLogs.pop();
-          localStorage.setItem('sreeambal_audit_logs', JSON.stringify(auditLogs));
-          if (currentUserRole === 'admin') {
-            renderAdminDashboard();
-            showToast(`Alert: ${payload.payload.staff} logged batch ${payload.payload.type}`, 'info');
-          }
-        }
-      })
-      .on('broadcast', { event: 'new_registration' }, (payload) => {
-        if (payload.payload && !staffAccounts.some(s => s.id === payload.payload.id)) {
-          staffAccounts.push(payload.payload);
-          saveStaffAccounts();
-          if (currentUserRole === 'admin') {
-            renderAdminDashboard();
-            showToast(`New staff registration: ${payload.payload.name}`, 'info');
-          }
-        }
-      })
-      .on('broadcast', { event: 'user_approved' }, (payload) => {
-        const approvedUser = payload.payload;
-        if (approvedUser) {
-          let acc = staffAccounts.find(s => s.id === approvedUser.id);
-          if (acc) {
-            acc.status = 'Approved';
-          } else {
-            staffAccounts.push(approvedUser);
-          }
-          saveStaffAccounts();
-          
-          // Auto-login staff if this device is waiting for this user approval!
-          if (currentUserRole === 'pending' && currentStaffName.toLowerCase() === approvedUser.name.toLowerCase()) {
+        // Auto check if this changes current user's approval status
+        if (currentUserRole === 'pending') {
+          const me = staffAccounts.find(s => s.name.toLowerCase() === currentStaffName.toLowerCase());
+          if (me && me.status === 'Approved') {
             currentUserRole = 'staff';
             localStorage.setItem('sreeambal_user_role', 'staff');
             routeToActiveRole();
             showToast(`Welcome back, ${currentStaffName}!`, 'info');
           }
-          if (currentUserRole === 'admin') {
-            renderAdminDashboard();
-          }
         }
-      })
-      .subscribe();
+      }
+    }, (err) => {
+      console.warn('[Realtime Staff Snapshot Error]:', err);
+    });
+
+    // 3. Realtime Peer-to-Peer Admin Broadcast Channel (Simulated using broadcasts collection)
+    const pageLoadTime = Date.now();
+    db.collection('broadcasts')
+      .where('timestamp', '>', pageLoadTime)
+      .onSnapshot((snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          if (change.type === 'added') {
+            const data = change.doc.data();
+            const event = data.event;
+            const payload = data.payload;
+
+            if (event === 'new_audit') {
+              if (payload && !auditLogs.some(l => l.id === payload.id)) {
+                auditLogs.unshift(payload);
+                if (auditLogs.length > 50) auditLogs.pop();
+                localStorage.setItem('sreeambal_audit_logs', JSON.stringify(auditLogs));
+                if (currentUserRole === 'admin') {
+                  renderAdminDashboard();
+                  showToast(`Alert: ${payload.staff} logged batch ${payload.type}`, 'info');
+                }
+              }
+            } else if (event === 'new_registration') {
+              if (payload && !staffAccounts.some(s => s.id === payload.id)) {
+                staffAccounts.push(payload);
+                saveStaffAccounts();
+                if (currentUserRole === 'admin') {
+                  renderAdminDashboard();
+                  showToast(`New staff registration: ${payload.name}`, 'info');
+                }
+              }
+            } else if (event === 'user_approved') {
+              const approvedUser = payload;
+              if (approvedUser) {
+                let acc = staffAccounts.find(s => s.id === approvedUser.id);
+                if (acc) {
+                  acc.status = 'Approved';
+                } else {
+                  staffAccounts.push(approvedUser);
+                }
+                saveStaffAccounts();
+                
+                // Auto-login staff if this device is waiting for this user approval!
+                if (currentUserRole === 'pending' && currentStaffName.toLowerCase() === approvedUser.name.toLowerCase()) {
+                  currentUserRole = 'staff';
+                  localStorage.setItem('sreeambal_user_role', 'staff');
+                  routeToActiveRole();
+                  showToast(`Welcome back, ${currentStaffName}!`, 'info');
+                }
+                if (currentUserRole === 'admin') {
+                  renderAdminDashboard();
+                }
+              }
+            }
+          }
+        });
+      }, (err) => {
+        console.warn('[Realtime Broadcast Snapshot Error]:', err);
+      });
   } catch (err) {
     console.warn('[Realtime Setup Exception]:', err);
   }
 }
 
 function broadcastAdminUpdate(event, data) {
-  if (!supabaseClient) return;
+  if (!db) return;
   try {
-    supabaseClient.channel('sreeambal_admin_broadcast').send({ type: 'broadcast', event: event, payload: data });
-  } catch (err) {}
+    db.collection('broadcasts').add({
+      event: event,
+      payload: data,
+      timestamp: Date.now()
+    }).catch(err => {
+      console.warn('[Broadcast Error]:', err);
+    });
+  } catch (err) {
+    console.warn('[Broadcast Exception]:', err);
+  }
 }
 
 /**

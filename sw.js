@@ -14,7 +14,8 @@ const ASSETS_TO_CACHE = [
   './i18n.js?v=5',
   './app.js?v=5',
   './manifest.json',
-  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
+  'https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js',
+  'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js',
   'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap'
 ];
 
@@ -53,8 +54,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = event.request.url;
 
-  // For Supabase API calls or realtime connections, let network handle directly
-  if (url.includes('supabase.co') || event.request.method !== 'GET') {
+  // For Firebase API calls or realtime connections, let network handle directly
+  if (url.includes('firebase') || url.includes('googleapis.com') || event.request.method !== 'GET') {
     event.respondWith(
       fetch(event.request).catch((error) => {
         console.warn('[ServiceWorker] Network request failed for API/dynamic call:', error);
