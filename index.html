@@ -199,9 +199,6 @@
             <button class="btn-export" onclick="exportLogsCSV()" title="Export Security Audit Logs as CSV Spreadsheet">
               <span data-i18n="exportLogsBtn">Export Logs (CSV)</span>
             </button>
-            <button class="btn-export" style="background: #ef4444; border-color: #f87171;" onclick="resetAllTestData()" title="Wipe test accounts & logs for clean demo">
-              <span>🧹 Reset Test Data</span>
-            </button>
           </div>
         </div>
 
@@ -426,7 +423,7 @@
     if ('caches' in window) {
       caches.keys().then(names => {
         names.forEach(name => {
-          if (name !== 'sreeambal-portal-v8') {
+          if (name !== 'sreeambal-portal-v9') {
             console.log('[CacheBuster] Deleting obsolete cache:', name);
             caches.delete(name);
           }
@@ -434,8 +431,8 @@
       });
     }
   </script>
-  <script src="./catalog.js?v=8"></script>
-  <script src="./i18n.js?v=8"></script>
-  <script src="./app.js?v=8"></script>
+  <script src="./catalog.js?v=9"></script>
+  <script src="./i18n.js?v=9"></script>
+  <script src="./app.js?v=9"></script>
 </body>
 </html>

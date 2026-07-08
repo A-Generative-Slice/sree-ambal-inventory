@@ -1004,40 +1004,6 @@ async function deleteUserAccount(id) {
   }
 }
 
-async function resetAllTestData() {
-  if (!confirm("Are you sure you want to clean up all test accounts and audit logs? This will reset your dashboard cleanly for the client demo.")) return;
-
-  // 1. Reset local state
-  auditLogs = [];
-  try { localStorage.removeItem('sreeambal_audit_logs'); } catch(e){}
-
-  staffAccounts = [
-    { id: 'staff-1', name: 'Kumar - Kitchen Supervisor', email: 'kumar@sreeambal.com', status: 'Approved', regTime: '2026-07-01', pin: '1111' },
-    { id: 'staff-2', name: 'Ramesh - Storekeeper', email: 'ramesh@sreeambal.com', status: 'Approved', regTime: '2026-07-02', pin: '2222' }
-  ];
-  saveStaffAccounts();
-
-  // 2. Clear Firestore collections if online
-  if (db && navigator.onLine) {
-    try {
-      const logsSnap = await db.collection('audit_logs').get();
-      logsSnap.forEach(doc => doc.ref.delete());
-
-      const staffSnap = await db.collection('staff_accounts').get();
-      staffSnap.forEach(doc => {
-        if (doc.id !== 'staff-1' && doc.id !== 'staff-2') {
-          doc.ref.delete();
-        }
-      });
-    } catch(err) {
-      console.warn('[Reset Test Data Firestore Exception]:', err);
-    }
-  }
-
-  renderAdminDashboard();
-  showToast('✨ Cleaned all test accounts and audit logs!', 'info');
-}
-
 function approveCustomItem(id) {
   const req = customRequests.find(r => r.id === id);
   if (req) {
