@@ -426,7 +426,7 @@
     if ('caches' in window) {
       caches.keys().then(names => {
         names.forEach(name => {
-          if (name !== 'sreeambal-portal-v7') {
+          if (name !== 'sreeambal-portal-v8') {
             console.log('[CacheBuster] Deleting obsolete cache:', name);
             caches.delete(name);
           }
@@ -434,8 +434,8 @@
       });
     }
   </script>
-  <script src="./catalog.js?v=7"></script>
-  <script src="./i18n.js?v=7"></script>
-  <script src="./app.js?v=7"></script>
+  <script src="./catalog.js?v=8"></script>
+  <script src="./i18n.js?v=8"></script>
+  <script src="./app.js?v=8"></script>
 </body>
 </html>

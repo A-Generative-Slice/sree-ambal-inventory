@@ -338,6 +338,7 @@ async function fetchStaffAccounts() {
     } catch (err) {
       console.warn('[Staff Accounts Fetch Exception]:', err);
     }
+  }
 }
 
 async function fetchAuditLogs() {

@@ -5,14 +5,14 @@
  * ============================================================================
  */
 
-const CACHE_NAME = 'sreeambal-portal-v7';
+const CACHE_NAME = 'sreeambal-portal-v8';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './style.css',
-  './catalog.js?v=7',
-  './i18n.js?v=7',
-  './app.js?v=7',
+  './catalog.js?v=8',
+  './i18n.js?v=8',
+  './app.js?v=8',
   './manifest.json',
   'https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js',
   'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js',
