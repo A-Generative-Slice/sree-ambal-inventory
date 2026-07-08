@@ -111,9 +111,10 @@ function initApp() {
     saveStaffAccounts();
   }
 
-  // Fetch live staff accounts and audit logs from database in background
+  // Fetch live staff accounts, audit logs, and custom item requests from database in background
   fetchStaffAccounts();
   fetchAuditLogs();
+  fetchCustomRequests();
 
   // Apply multilingual translations
   if (typeof applyTranslations === 'function') applyTranslations();
@@ -356,7 +357,23 @@ async function fetchAuditLogs() {
         if (currentUserRole === 'admin') renderAdminDashboard();
       }
     } catch (err) {
-      console.warn('[Audit Logs Fetch Exception]:', err);
+    }
+  }
+}
+
+async function fetchCustomRequests() {
+  if (db && navigator.onLine) {
+    try {
+      const snapshot = await db.collection('custom_requests').get();
+      const reqs = [];
+      snapshot.forEach(doc => reqs.push(doc.data()));
+      if (reqs.length > 0) {
+        customRequests = reqs;
+        localStorage.setItem('sreeambal_custom_requests', JSON.stringify(customRequests));
+        if (currentUserRole === 'admin') renderAdminDashboard();
+      }
+    } catch (err) {
+      console.warn('[Custom Requests Fetch Exception]:', err);
     }
   }
 }
@@ -438,6 +455,13 @@ function submitCustomItemRequest() {
 
   customRequests.push(newReq);
   localStorage.setItem('sreeambal_custom_requests', JSON.stringify(customRequests));
+  
+  if (db && navigator.onLine) {
+    db.collection('custom_requests').doc(newReq.id).set(newReq).catch(err => {
+      console.warn('[Custom Request Firestore Save Error]:', err);
+    });
+  }
+
   closeCustomItemModal();
   showToast('Custom item request submitted for Admin approval!', 'info');
   broadcastAdminUpdate('new_custom_request', newReq);
@@ -1022,6 +1046,10 @@ function approveCustomItem(id) {
     savedCustom.push(newItem);
     localStorage.setItem('sreeambal_approved_custom', JSON.stringify(savedCustom));
 
+    if (db && navigator.onLine) {
+      db.collection('custom_requests').doc(id).update({ status: 'Approved' }).catch(e => console.warn(e));
+    }
+
     renderAdminDashboard();
     showToast(`Added custom item '${req.name}' to live South Indian Catalog!`, 'info');
   }
@@ -1030,6 +1058,9 @@ function approveCustomItem(id) {
 function rejectCustomItem(id) {
   customRequests = customRequests.filter(r => r.id !== id);
   localStorage.setItem('sreeambal_custom_requests', JSON.stringify(customRequests));
+  if (db && navigator.onLine) {
+    db.collection('custom_requests').doc(id).delete().catch(e => console.warn(e));
+  }
   renderAdminDashboard();
   showToast('Custom item request dismissed.', 'info');
 }
@@ -1204,6 +1235,19 @@ function setupRealtimeChannels() {
       }
     }, (err) => {
       console.warn('[Realtime Audit Logs Snapshot Error]:', err);
+    });
+
+    // 2.6. Listen for Custom Item Requests updates from Firestore
+    db.collection('custom_requests').onSnapshot((snapshot) => {
+      const reqs = [];
+      snapshot.forEach(doc => reqs.push(doc.data()));
+      if (reqs.length > 0) {
+        customRequests = reqs;
+        localStorage.setItem('sreeambal_custom_requests', JSON.stringify(customRequests));
+        if (currentUserRole === 'admin') renderAdminDashboard();
+      }
+    }, (err) => {
+      console.warn('[Realtime Custom Requests Snapshot Error]:', err);
     });
 
     // 3. Realtime Peer-to-Peer Admin Broadcast Channel (Simulated using broadcasts collection)

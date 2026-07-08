@@ -50,12 +50,17 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 body {
   font-family: var(--font-main);
   background: var(--bg-main);
   color: var(--text-white);
   min-height: 100vh;
-  overflow-x: hidden;
   line-height: 1.5;
   padding-bottom: 40px;
 }
