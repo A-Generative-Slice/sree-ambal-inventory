@@ -151,7 +151,7 @@
         <!-- Search & Filter Bar -->
         <div class="search-filter-box">
           <div class="search-input-wrapper">
-            <span class="search-icon">Search:</span>
+            <span class="search-icon">🔍</span>
             <input type="text" id="catalog-search-input" class="search-input" data-i18n-placeholder="searchPlaceholder" placeholder="Search 200+ items in any language..." oninput="filterCatalog()">
           </div>
           
@@ -423,7 +423,7 @@
     if ('caches' in window) {
       caches.keys().then(names => {
         names.forEach(name => {
-          if (name !== 'sreeambal-portal-v9') {
+          if (name !== 'sreeambal-portal-v10') {
             console.log('[CacheBuster] Deleting obsolete cache:', name);
             caches.delete(name);
           }
@@ -431,8 +431,8 @@
       });
     }
   </script>
-  <script src="./catalog.js?v=9"></script>
-  <script src="./i18n.js?v=9"></script>
-  <script src="./app.js?v=9"></script>
+  <script src="./catalog.js?v=10"></script>
+  <script src="./i18n.js?v=10"></script>
+  <script src="./app.js?v=10"></script>
 </body>
 </html>
